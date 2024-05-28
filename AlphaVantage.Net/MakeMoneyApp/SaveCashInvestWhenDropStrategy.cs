@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AlphaVantage.Net.Stocks.TimeSeries;
+using MakeMoneyApp;
 
 namespace ClientPlayground;
 
@@ -10,9 +10,9 @@ namespace ClientPlayground;
 /// </summary>
 public class SaveCashInvestWhenDropStrategy : InvestmentStrategy
 {
-	private decimal          _amountEachMonth;
-	private readonly int     _priceDropPercent;
-	private readonly int     _compareToMaxPriceInDaysPeriod;
+	private decimal      _amountEachMonth;
+	private readonly int _priceDropPercent;
+	private readonly int _compareToMaxPriceInDaysPeriod;
 	
 	public override string Name => "SaveCashInvestWhenDropStrategy";
 
@@ -26,13 +26,11 @@ public class SaveCashInvestWhenDropStrategy : InvestmentStrategy
 		_compareToMaxPriceInDaysPeriod = compareToMaxPriceInDaysPeriod;
 	}
 
-	public override (decimal result, string log) Execute(IList<StockDataPoint> dataPoints)
+	public override (decimal result, string log) Execute(IList<StockPrice> dataPoints)
 	{
-		decimal cash =  _initialInvestment;
-
+		decimal cash   =  _initialInvestment;
 		decimal shares = cash / dataPoints[0].ClosingPrice;
-
-		string debug = "";
+		string  debug  = "";
 		
 		if (cash > 0)
 			debug += GetBuyingSharesAtForString(dataPoints[0], cash);
@@ -43,16 +41,16 @@ public class SaveCashInvestWhenDropStrategy : InvestmentStrategy
 		{
 			cash += _amountEachMonth;
 			
-			if (x.dp.Time.Subtract(TimeSpan.FromDays(_compareToMaxPriceInDaysPeriod)) > dataPoints[0].Time)
+			if (x.dp.Date.Subtract(TimeSpan.FromDays(_compareToMaxPriceInDaysPeriod)) > dataPoints[0].Date)
 			{
-				var minmax = GetMinAndMaxPriceForPeriod(dataPoints, x.index, _compareToMaxPriceInDaysPeriod);
-
+				var minmax  = GetMinAndMaxPriceForPeriod(dataPoints, x.index, _compareToMaxPriceInDaysPeriod);
 				var percent = (decimal) (100 - _priceDropPercent) / 100;
+				
 				if (x.dp.ClosingPrice <= minmax.maxPrice * percent)
 				{
 					shares += cash / x.dp.ClosingPrice;
-					debug += GetBuyingSharesAtForString(x.dp, cash);
-					cash = 0;
+					debug  += GetBuyingSharesAtForString(x.dp, cash);
+					cash   = 0;
 				}
 			}
 		}

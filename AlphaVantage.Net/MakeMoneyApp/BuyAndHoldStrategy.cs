@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using AlphaVantage.Net.Stocks.TimeSeries;
+using MakeMoneyApp;
 
 namespace ClientPlayground;
 
@@ -11,7 +11,7 @@ public class BuyAndHoldStrategy : InvestmentStrategy
 	{
 	}
 
-	public override (decimal result, string log) Execute(IList<StockDataPoint> dataPoints)
+	public override (decimal result, string log) Execute(IList<StockPrice> dataPoints)
 	{
 		decimal shares        = _initialInvestment / dataPoints[0].ClosingPrice;
 		decimal initialShares = shares;

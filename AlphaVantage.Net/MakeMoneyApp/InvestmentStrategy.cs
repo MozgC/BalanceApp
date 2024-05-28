@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using AlphaVantage.Net.Stocks.TimeSeries;
+using MakeMoneyApp;
 
 namespace ClientPlayground;
 
@@ -16,11 +17,11 @@ public abstract class InvestmentStrategy
 		_initialInvestment = initialInvestment;
 	}
 
-	public abstract (decimal result, string log) Execute(IList<StockDataPoint> dataPoints);
+	public abstract (decimal result, string log) Execute(IList<StockPrice> dataPoints);
 
 	private static ConcurrentDictionary<(int currentDayIndex, int periodInDays), (decimal minPrice, decimal maxPrice)> _minMaxPrice = new ConcurrentDictionary<(int currentDayIndex, int periodInDays), (decimal minPrice, decimal maxPrice)>();
 
-	public static (decimal minPrice, decimal maxPrice) GetMinAndMaxPriceForPeriod(IList<StockDataPoint> dataPoints, int currentDayIndex, int periodInDays)
+	public static (decimal minPrice, decimal maxPrice) GetMinAndMaxPriceForPeriod(IList<StockPrice> dataPoints, int currentDayIndex, int periodInDays)
 	{
 		if (_minMaxPrice.TryGetValue((currentDayIndex, periodInDays), out var res))
 			return res;
@@ -30,7 +31,7 @@ public abstract class InvestmentStrategy
 
 		int prevDay = currentDayIndex - 1;
 
-		while (prevDay >= 0 && (dataPoints[currentDayIndex].Time.Date - dataPoints[prevDay].Time.Date).Days < periodInDays)
+		while (prevDay >= 0 && (dataPoints[currentDayIndex].Date.Date - dataPoints[prevDay].Date.Date).Days < periodInDays)
 		{
 			decimal price = dataPoints[prevDay].ClosingPrice;
 
@@ -46,7 +47,7 @@ public abstract class InvestmentStrategy
 		return _minMaxPrice[(currentDayIndex, periodInDays)] = (min, max);
 	}
 
-	public static IEnumerable<(StockDataPoint dp, int index)> GetFirstBusinessDatesOfEachMonth(IList<StockDataPoint> dps, bool includeFirstDataPoint)
+	public static IEnumerable<(StockPrice dp, int index)> GetFirstBusinessDatesOfEachMonth(IList<StockPrice> dps, bool includeFirstDataPoint)
 	{
 		DateTime? date = null;
 
@@ -55,7 +56,7 @@ public abstract class InvestmentStrategy
 			var dpx = dps[i];
 			if (date == null)
 			{
-				date = dpx.Time.Date;
+				date = dpx.Date.Date;
 
 				if (includeFirstDataPoint)
 					yield return (dpx, i);
@@ -63,20 +64,20 @@ public abstract class InvestmentStrategy
 				continue;
 			}
 
-			if (date.Value.Month == dpx.Time.Month)
+			if (date.Value.Month == dpx.Date.Month)
 				continue;
 
-			date = dpx.Time.Date;
+			date = dpx.Date.Date;
 			yield return (dpx, i);
 		}
 	}
 
-	public static string GetBuyingSharesAtForString(StockDataPoint dp, decimal cash)
+	public static string GetBuyingSharesAtForString(StockPrice dp, decimal cash)
 	{
-		return $"{dp.Time:d} Buying {cash / dp.ClosingPrice:N} shares at {dp.ClosingPrice:C} for  {cash:C}\n";
+		return $"{dp.Date:d} Buying {cash / dp.ClosingPrice:N} shares at {dp.ClosingPrice:C} for  {cash:C}\n";
 	}
-	public static string GetSellingSharesAtForString(StockDataPoint dp, decimal shares)
+	public static string GetSellingSharesAtForString(StockPrice dp, decimal shares)
 	{
-		return $"{dp.Time:d} Selling {shares:N} shares at {dp.ClosingPrice:C} for {shares * dp.ClosingPrice:C}\n";
+		return $"{dp.Date:d} Selling {shares:N} shares at {dp.ClosingPrice:C} for {shares * dp.ClosingPrice:C}\n";
 	}
 }

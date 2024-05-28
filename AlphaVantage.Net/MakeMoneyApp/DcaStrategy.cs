@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using AlphaVantage.Net.Stocks.TimeSeries;
+using MakeMoneyApp;
 
 namespace ClientPlayground;
 
@@ -16,7 +16,7 @@ public class DcaStrategy : InvestmentStrategy
 		_amountEachMonth = amountEachMonth;
 	}
 
-	public override (decimal result, string log) Execute(IList<StockDataPoint> dataPoints)
+	public override (decimal result, string log) Execute(IList<StockPrice> dataPoints)
 	{
 		decimal cash  = _initialInvestment;
 		decimal total = _initialInvestment;

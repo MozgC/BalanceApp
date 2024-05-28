@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using AlphaVantage.Net.Stocks.TimeSeries;
+using MakeMoneyApp;
 
 namespace ClientPlayground;
 
@@ -16,7 +17,7 @@ public class BuyLowSellHighStrategy : InvestmentStrategy
 		_percentDiff  = percentDiff;
 	}
 
-	public override (decimal result, string log) Execute(IList<StockDataPoint> dataPoints)
+	public override (decimal result, string log) Execute(IList<StockPrice> dataPoints)
 	{
 		string debug = InvestmentStrategy.GetBuyingSharesAtForString(dataPoints[0], _initialInvestment);
 			
