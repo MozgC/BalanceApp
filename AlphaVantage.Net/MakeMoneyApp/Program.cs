@@ -20,7 +20,7 @@ namespace MakeMoneyApp
 
 		static void Main(string[] args)
 		{
-			string security = "UPRO";
+			string security = "LABU";
 			Console.WriteLine("Security: " + security);
 
 			_client = new YahooFinanceProvider();
@@ -334,6 +334,7 @@ namespace MakeMoneyApp
 					continue;
 
 				// what if it dropped 50% in 1 day, price can be less than MA, should we sell?
+				// if price is above Simple MA and below EMA - sell
 				if (shares > 0 && price / ma.Value >= (1 + percentUpFromMa / 100) && price < ema.Value)
 				{
 					string str = $"{dp.Date:d} Selling {shares:N} shares at {price:C} for  {shares * price:C}\n";
@@ -342,6 +343,7 @@ namespace MakeMoneyApp
 					cash = shares * price;
 					shares = 0;
 				}
+				// if price is below  MA and above EMA - buy
 				else if (cash > 0 && price / ma.Value <= (1 - percentDownFromMa / 100) && price > ema.Value)
 				{
 					string str = $"{dp.Date:d} Buying {cash / price:N} shares at {price:C} for  {cash:C}\n";
