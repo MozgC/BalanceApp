@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29827.131
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{768F93FA-CA7A-4828-8ECA-BC4EF5433811}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientPlayground", "ClientPlayground\ClientPlayground.csproj", "{5582639E-1859-4530-A5EE-7CC0EA04620B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MakeMoneyApp", "MakeMoneyApp\MakeMoneyApp.csproj", "{80948FBF-9272-4487-85DF-E0F95988D7FD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OoplesFinance.YahooFinanceAPI", "OoplesFinance.YahooFinanceAPI\OoplesFinance.YahooFinanceAPI.csproj", "{7A0D64A6-066A-467B-BFFD-481C1B15F7D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{80948FBF-9272-4487-85DF-E0F95988D7FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80948FBF-9272-4487-85DF-E0F95988D7FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80948FBF-9272-4487-85DF-E0F95988D7FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A0D64A6-066A-467B-BFFD-481C1B15F7D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A0D64A6-066A-467B-BFFD-481C1B15F7D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A0D64A6-066A-467B-BFFD-481C1B15F7D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A0D64A6-066A-467B-BFFD-481C1B15F7D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

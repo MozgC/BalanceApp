@@ -12,10 +12,10 @@
   <ItemGroup>
     <PackageReference Include="CodeJam" Version="3.1.0" />
     <PackageReference Include="linq2db.SQLite" Version="3.1.4" />
-    <PackageReference Include="OoplesFinance.YahooFinanceAPI" Version="1.6.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\OoplesFinance.YahooFinanceAPI\OoplesFinance.YahooFinanceAPI.csproj" />
     <ProjectReference Include="..\src\AlphaVantage.Net.Stocks\AlphaVantage.Net.Stocks.csproj" />
   </ItemGroup>
 

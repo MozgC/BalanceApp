@@ -20,14 +20,15 @@ namespace MakeMoneyApp
 
 		static void Main(string[] args)
 		{
-			string security = "LABU";
+			string security = "^IXIC";
 			Console.WriteLine("Security: " + security);
+
+			//IStockPriceProvider provider2 = new AlphaVantageNetProvider(_alphaVantage);
+			//var data2 = provider2.GetLast10YearsOfPrices(security);
 
 			_client = new YahooFinanceProvider();
 			var dataPoints = _client.GetLast10YearsOfPrices(security);
 
-			//IStockPriceProvider provider2 = new AlphaVantageNetProvider(_alphaVantage);
-			//var data2 = provider2.GetLast10YearsOfPrices(security);
 
 			decimal initialInvestment = 49000;
 
