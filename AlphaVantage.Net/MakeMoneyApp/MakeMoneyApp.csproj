@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="CodeJam" Version="3.1.0" />
     <PackageReference Include="linq2db.SQLite" Version="3.1.4" />
+    <PackageReference Include="ScottPlot.WinForms" Version="5.1.57" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +41,16 @@
       <DependentUpon>DataModel.tt</DependentUpon>
     </Compile>
   </ItemGroup>
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<!-- Or net9.0-windows -->
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<!-- Enables WinForms -->
+	</PropertyGroup>
 
 </Project>
 
