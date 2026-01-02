@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using AlphaVantage.Net.Stocks.TimeSeries;
-using MakeMoneyApp;
+﻿using System.Collections.Concurrent;
+using StrategyTester;
 
 namespace ClientPlayground;
 

@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -18,13 +17,13 @@
   <ItemGroup>
     <PackageReference Include="CodeJam" Version="3.1.0" />
     <PackageReference Include="linq2db.SQLite" Version="3.1.4" />
+    <PackageReference Include="OoplesFinance.YahooFinanceAPI" Version="1.7.1" />
     <PackageReference Include="ScottPlot.WinForms" Version="5.1.57" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\3rdPartyProjects\AlphaVantage.Net.Core\AlphaVantage.Net.Core.csproj" />
     <ProjectReference Include="..\3rdPartyProjects\AlphaVantage.Net.Stocks\AlphaVantage.Net.Stocks.csproj" />
-    <ProjectReference Include="..\3rdPartyProjects\OoplesFinance.YahooFinanceAPI\OoplesFinance.YahooFinanceAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -51,7 +50,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net9.0-windows</TargetFramework>
+		<TargetFramework>net10.0-windows7.0</TargetFramework>
 		<!-- Or net9.0-windows -->
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>

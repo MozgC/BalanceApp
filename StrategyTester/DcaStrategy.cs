@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using MakeMoneyApp;
+using StrategyTester;
 
 namespace ClientPlayground;
 

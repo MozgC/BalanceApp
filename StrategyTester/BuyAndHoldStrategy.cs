@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using MakeMoneyApp;
+using StrategyTester;
 
 namespace ClientPlayground;
 

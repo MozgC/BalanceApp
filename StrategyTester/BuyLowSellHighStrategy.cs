@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
-using AlphaVantage.Net.Stocks.TimeSeries;
-using MakeMoneyApp;
+using StrategyTester;
 
 namespace ClientPlayground;
 

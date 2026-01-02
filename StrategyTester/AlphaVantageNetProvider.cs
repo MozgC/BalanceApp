@@ -6,7 +6,7 @@ using AlphaVantage.Net.Stocks.TimeSeries;
 using AlphaVantage.Net.Stocks;
 using System;
 
-namespace MakeMoneyApp
+namespace StrategyTester
 {
 	/// <summary>
 	/// Currently free access to AlphaVantage does not adjust for stock splits, so it becomes almost useless,

@@ -7,7 +7,7 @@ using LinqToDB.Data;
 using ScottPlot;
 using ScottPlot.WinForms;
 
-namespace MakeMoneyApp
+namespace StrategyTester
 {
 	class Program
 	{

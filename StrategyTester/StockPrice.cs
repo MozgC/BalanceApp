@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MakeMoneyApp
+namespace StrategyTester
 {
 	public class StockPrice
 	{

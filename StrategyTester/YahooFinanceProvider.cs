@@ -4,7 +4,7 @@ using OoplesFinance.YahooFinanceAPI;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MakeMoneyApp
+namespace StrategyTester
 {
 	public class YahooFinanceProvider : IStockPriceProvider
 	{

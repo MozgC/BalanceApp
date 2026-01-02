@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MakeMoneyApp;
+namespace StrategyTester;
 
 /// <summary>
 /// An interface representing a stock price history information so that we could switch different providers, like Yahoo Finance or AlphaVantage
