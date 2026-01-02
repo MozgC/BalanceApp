@@ -10,14 +10,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="NewFolder\**" />
+    <EmbeddedResource Remove="NewFolder\**" />
+    <None Remove="NewFolder\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CodeJam" Version="3.1.0" />
     <PackageReference Include="linq2db.SQLite" Version="3.1.4" />
     <PackageReference Include="ScottPlot.WinForms" Version="5.1.57" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OoplesFinance.YahooFinanceAPI\OoplesFinance.YahooFinanceAPI.csproj" />
-    <ProjectReference Include="..\src\AlphaVantage.Net.Stocks\AlphaVantage.Net.Stocks.csproj" />
+    <ProjectReference Include="..\3rdPartyProjects\AlphaVantage.Net.Core\AlphaVantage.Net.Core.csproj" />
+    <ProjectReference Include="..\3rdPartyProjects\AlphaVantage.Net.Stocks\AlphaVantage.Net.Stocks.csproj" />
+    <ProjectReference Include="..\3rdPartyProjects\OoplesFinance.YahooFinanceAPI\OoplesFinance.YahooFinanceAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,7 +33,7 @@
     </None>
     <None Update="DataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>DataModel.generated.cs</LastGenOutput>
+      <LastGenOutput>DataModel.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -35,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="DataModel.generated.cs">
+    <Compile Update="DataModel.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>DataModel.tt</DependentUpon>

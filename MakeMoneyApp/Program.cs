@@ -4,12 +4,8 @@ using CodeJam.Threading;
 using DataModels;
 using JetBrains.Annotations;
 using LinqToDB.Data;
-using OpenTK.Platform.X11;
 using ScottPlot;
-using ScottPlot.Colormaps;
-using ScottPlot.TickGenerators;
 using ScottPlot.WinForms;
-using Color = ScottPlot.Color;
 
 namespace MakeMoneyApp
 {
@@ -27,10 +23,6 @@ namespace MakeMoneyApp
 
 			// На всякий случай (иногда нужно и это)
 			Console.InputEncoding = System.Text.Encoding.UTF8;
-			
-			//ShowHeatMap();
-			
-			//ShowGraph(new List<Coordinates> { new Coordinates(1, 1), new Coordinates(2, 2), new Coordinates(3, 1.5)});
 
 			string security = "SOXL";
 			Console.WriteLine("Security: " + security);
@@ -52,39 +44,7 @@ namespace MakeMoneyApp
 
 			dataPoints = dataPoints.SkipWhile(dp => dp.Date < fromDate).Where(dp => dp.Date < toDate).ToList();
 
-			//TestStrategy2(dataPoints);
-			//TestMainStrategy(dataPoints);
 			TestMainStrategy2(dataPoints);
-
-			// Добавь в брутфорс после нахождения «рекорда» вот это:
-			Console.WriteLine($"Тестирую соседние параметры вокруг 58/10/31");
-
-			decimal bestResult      = 0;
-			string  bestDescription = "";
-			string  bestFullLog     = "";
-			
-			for (int priceDrop = 5; priceDrop < 50; priceDrop += 5)
-			{
-				for (int periodDays = 90; periodDays < 365 * 5; periodDays += 30)
-				{
-					var strategy = new SaveCashInvestWhenDropStrategy(0, 1000, priceDrop, periodDays);
-					Console.WriteLine($"Description: {strategy.Description}");
-					var result = strategy.Execute(dataPoints);
-					Console.WriteLine($"Result: {result.result:C0}");
-
-					if (result.result > bestResult)
-					{
-						bestResult      = result.result;
-						bestDescription = strategy.Description;
-						bestFullLog     = result.log;
-					}
-				}
-			}
-			
-			Console.WriteLine("Best strategy: " + bestDescription);
-			Console.WriteLine($"Result: {bestResult:C}");
-			Console.WriteLine("Full log:");
-			Console.WriteLine(bestFullLog);
 
 			var strategies = new InvestmentStrategy[]
 			{
@@ -125,8 +85,21 @@ namespace MakeMoneyApp
 			Console.ReadLine();
 		}
 	
-		private static void ShowHeatMap(Dictionary<(int x, int y), List<decimal>> heatMap)
+		private static void ShowHeatMap(Dictionary<(int x, int y), List<decimal>> heatMap, bool labelValues)
 		{
+			/*
+			heatMap = new Dictionary<(int x, int y), List<decimal>>();
+			heatMap[(0, 4)] = new List<decimal>() { 1 };
+			heatMap[(0, 5)] = new List<decimal>() { 2 };
+			heatMap[(0, 6)] = new List<decimal>() { 3 };
+			heatMap[(1, 4)] = new List<decimal>() { 4 };
+			heatMap[(1, 5)] = new List<decimal>() { 5 };
+			heatMap[(1, 6)] = new List<decimal>() { 6 };
+			heatMap[(2, 4)] = new List<decimal>() { 7 };
+			heatMap[(2, 5)] = new List<decimal>() { 8 };
+			heatMap[(2, 6)] = new List<decimal>() { 9 };
+			*/
+			
 			var maSet =  heatMap.Keys.Select(k => k.x).Distinct().OrderBy(x => x);
 			var emaSet = heatMap.Keys.Select(k => k.y).Distinct().OrderBy(x => x);
 
@@ -148,21 +121,34 @@ namespace MakeMoneyApp
 
 					if (heatMap.TryGetValue((ma, ema), out var list) && list.Count > 0)
 					{
-						data[row, col] = (double)list.Average();
+						data[yValues.Length - 1 - row, col] = (double)list.Average();
 					}
 					else
 					{
-						data[row, col] = double.NaN; // пустые ячейки
+						data[yValues.Length - 1 - row, col] = double.NaN; // пустые ячейки
 					}
 				}
 			}
-			
+
 			var plot = new ScottPlot.Plot();
 
-			// heatmap data lives at indices [0..rows-1, 0..cols-1]
 			var hm = plot.Add.Heatmap(data);
 			hm.Colormap = new ScottPlot.Colormaps.Turbo();
 			hm.Smooth = true;
+
+			if (labelValues)
+			{
+				for (int y = 0; y < data.GetLength(0); y++)
+				for (int x = 0; x < data.GetLength(1); x++)
+				{
+					Coordinates coordinates = new(x, y);
+					string cellLabel = data[yValues.Length - 1 - y, x].ToString("0.0");
+					var text = plot.Add.Text(cellLabel, coordinates);
+					text.Alignment = Alignment.MiddleCenter;
+					text.LabelFontSize = 30;
+					text.LabelFontColor = Colors.White;
+				}
+			}
 
 			// axis titles
 			plot.Title("HeatMap");
@@ -191,29 +177,14 @@ namespace MakeMoneyApp
 			// optional but keeps the heatmap tightly framed with half-cell padding
 			plot.Axes.SetLimits(left: -0.5, right: cols - 0.5, bottom: -0.5, top: rows - 0.5);
 
-			plot.Add.ColorBar(hm);
+			var cb = plot.Add.ColorBar(hm);
+			cb.Label = "Profit ratio";
+			///cb.LabelStyle.FontSize = 24;
 
 			FormsPlotViewer.Launch(plot);
 		}
 
 		private static object _syncObj = new();
-
-		private static void ShowGraph(List<Coordinates> coordinates)
-		{
-			var plot = new Plot();
-        
-			// Add points as scatter + connected line
-			plot.Add.Scatter(coordinates, Color.FromColor(System.Drawing.Color.Blue));
-
-			plot.Axes.AutoScale();
-			plot.Title("My Graph");
-			plot.XLabel("X Axis");
-			plot.YLabel("Y Axis");
-			plot.Legend.IsVisible = true;
-
-			// Launch interactive popup (static call—no 'new'!)
-			FormsPlotViewer.Launch(plot);  // This opens the window and blocks
-		}
 
 		/*
 		private static void TestMainStrategy(IList<StockPrice> dataPoints)
@@ -545,6 +516,7 @@ namespace MakeMoneyApp
 			
 			return (cash, debug, tradeCount, maxDrawdown, profitFactor);
 		}
+		
 		private static (decimal finalProfitRatio, string Debug, int TradeCount, decimal MaxDrawdown, decimal ProfitFactor) MainStrategy2(
 			IList<StockPrice> dataPoints,
 			int maDays,
@@ -562,7 +534,6 @@ namespace MakeMoneyApp
 			decimal grossLoss = 0m;
 			int winningTrades = 0;
 			int losingTrades = 0;
-			decimal entryPrice = lastBuy.ClosingPrice;
 
 			string debug = InvestmentStrategy.GetBuyingSharesAtForString(dataPoints[0], cash);
 
@@ -597,7 +568,7 @@ namespace MakeMoneyApp
 
 					tradeCount++;
 					
-					decimal pnl = (price / entryPrice - 1m);
+					decimal pnl = (price / lastBuy.ClosingPrice - 1m);
 					if (pnl > 0)
 					{
 						grossProfit += cash * pnl;  // или просто pnl в процентах
@@ -610,10 +581,9 @@ namespace MakeMoneyApp
 					}
 
 					// Обновление просадки
-					decimal currentEquity = cash > 0 ? cash : shares * price;
-					if (currentEquity > peak) peak = currentEquity;
-					decimal dd = (peak - currentEquity) / peak;
-					if (dd > maxDrawdown) maxDrawdown = dd;
+					if (cash > peak) peak = cash;
+					decimal currentDrawdownFromPeak = (peak - cash) / peak;
+					if (currentDrawdownFromPeak > maxDrawdown) maxDrawdown = currentDrawdownFromPeak;
 				}
 				// if price is below  MA and above EMA - buy
 				else if (cash > 0 && emaPrev < maPrev && ema > ma)
@@ -626,7 +596,6 @@ namespace MakeMoneyApp
 					lastBuy = dp;
 
 					tradeCount++;
-					entryPrice = price;
 				}
 			}
 
@@ -642,130 +611,6 @@ namespace MakeMoneyApp
 			decimal profitFactor = grossLoss == 0 ? 999m : grossProfit / grossLoss;
 			
 			return (cash / initialInvestment, debug, tradeCount, maxDrawdown, profitFactor);
-		}
-		
-		private static void TestMainStrategy(IList<StockPrice> dataPoints)
-		{
-		    // Сначала сортируем данные по дате (на всякий случай)
-		    dataPoints = dataPoints.OrderBy(dp => dp.Date).ToList();
-
-		    // Группируем данные по месяцам для Walk-Forward
-		    var monthlyGroups = dataPoints.GroupBy(x => new { x.Date.Year, x.Date.Month })
-		                                  .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
-		                                  .Select(g => g.OrderBy(x => x.Date).ToList())
-		                                  .ToList();
-
-		    // Параметры для Walk-Forward
-		    const int minInSampleMonths = 48; // 4 года
-		    const int oosMonths = 12;         // 1 год OOS
-		    const int stepMonths = 12;        // Шаг переоптимизации 1 год
-
-		    double capital = 1000.0;  // Начальный капитал
-		    var equityCurve = new List<double>();
-		    var allOosResults = new List<(int maDays, int emaDays, int upPercent, decimal oosProfitPercent, int trades)>(); // Для анализа
-
-		    // Heatmap данные: словарь для всех комбинаций (maDays, upPercent) -> средний result по emaDays
-		    var heatmapData = new Dictionary<(int ma, int pct), List<decimal>>();
-
-		    for (int oosStartMonth = minInSampleMonths; oosStartMonth < monthlyGroups.Count; oosStartMonth += stepMonths)
-		    {
-		        int isEndMonth = oosStartMonth;  // Конец In-Sample
-		        int oosEndMonth = Math.Min(oosStartMonth + oosMonths, monthlyGroups.Count);
-
-		        // Собираем In-Sample данные
-		        var isData = monthlyGroups.Take(isEndMonth).SelectMany(x => x).ToList();
-
-		        // Брутфорс на In-Sample с фильтрами против переобучения
-		        decimal record = decimal.MinValue;
-		        int bestMa = 0, bestEma = 0, bestUp = 0;
-		        string bestDebug = "";
-		        int bestTrades = 0;
-
-		        // Очищаем временный dict для текущего IS (для heatmap внутри)
-		        var currentHeatmap = new Dictionary<(int ma, int pct), List<decimal>>();
-
-		        ParallelExtensions.RunInParallel(Enumerable.Range(15, 186), Environment.ProcessorCount - 1, maDays =>
-		        {
-		            for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
-		            for (int upPercent = 2; upPercent <= 15; upPercent++)
-		            {
-		                int downPercent = upPercent;
-		                var (result, debug, tradeCount, maxDrawdown, profitFactor) = MainStrategy(isData, maDays, emaDays, upPercent, upPercent);
-
-		                // Фильтры против переобучения
-		                if (tradeCount >= 30 &&                // Минимум 30 сделок на IS
-		                    result > 1.5m * 1000 &&        // Минимум 50% прибыли (от 1000)
-		                    maxDrawdown < 25m &&  // Макс просадка <25% (нужно реализовать функцию)
-		                    profitFactor > 1.6m)   // Profit Factor >1.6 (нужно реализовать)
-		                {
-		                    lock (_syncObj)
-		                    {
-		                        // Собираем для heatmap: агрегируем по maDays и upPercent (среднее по emaDays)
-		                        var key = (maDays, upPercent);
-		                        if (!currentHeatmap.ContainsKey(key))
-		                            currentHeatmap[key] = new List<decimal>();
-		                        currentHeatmap[key].Add(result);
-
-		                        if (result > record)
-		                        {
-		                            record = result;
-		                            bestMa = maDays;
-		                            bestEma = emaDays;
-		                            bestUp = upPercent;
-		                            bestDebug = debug;
-		                            bestTrades = tradeCount;
-		                        }
-		                    }
-		                }
-		            }
-		        });
-
-		        Console.WriteLine($"Оптимизация до {monthlyGroups[isEndMonth-1][0].Date:yyyy-MM} → лучшие: MA={bestMa} EMA={bestEma} %={bestUp} (сделок: {bestTrades})");
-
-		        // OOS тест
-		        var oosData = monthlyGroups.Skip(isEndMonth).Take(oosEndMonth - isEndMonth).SelectMany(x => x).ToList();
-		        var (oosResult, oosDebug, oosTrades, _maxDrawdown, _profitFactor) = MainStrategy(oosData, bestMa, bestEma, bestUp, bestUp);
-
-		        // Фильтр на OOS: если trades <20 или result <0.6 * record — пропускаем или логируем warning
-		        // todo: choose right oosTrades & OOS period
-		        if (oosTrades < 10 || oosResult < 0.6m * record)
-		        {
-		            Console.WriteLine("WARNING: OOS не прошёл фильтр — возможно переобучение");
-		            continue;
-		        }
-
-		        // Накопление эквити с compounding
-		        decimal oosProfitPercent = (oosResult / 1000m - 1m) * 100m;  // % от 1000
-		        capital *= (1 + (double)(oosProfitPercent / 100m));
-
-		        equityCurve.Add(capital);
-		        allOosResults.Add((bestMa, bestEma, bestUp, oosProfitPercent, oosTrades));
-
-		        Console.WriteLine($"OOS: +{oosProfitPercent:F2}% (сделок: {oosTrades}) → капитал = {capital:F2}");
-
-		        // Агрегируем в общий heatmap (среднее по всем IS)
-		        foreach (var kvp in currentHeatmap)
-		        {
-		            var key = kvp.Key;
-		            if (!heatmapData.ContainsKey(key))
-		                heatmapData[key] = new List<decimal>();
-		            heatmapData[key].Add(kvp.Value.Average());  // Среднее по emaDays за этот IS
-		        }
-		    }
-
-		    // В конце: вывод equity curve
-		    Console.WriteLine("\nEquity Curve:");
-		    foreach (var eq in equityCurve)
-		        Console.WriteLine(eq.ToString("F2"));
-
-		    // Данные для Heatmap: выводим в CSV формат (maDays, upPercent, avgResult)
-		    Console.WriteLine("\nHeatmap Data (для построения в Excel/Python):");
-		    Console.WriteLine("maDays,upPercent,avgResult");
-		    foreach (var kvp in heatmapData.OrderBy(k => k.Key.ma).ThenBy(k => k.Key.pct))
-		    {
-		        decimal avg = kvp.Value.Average();  // Среднее по всем IS
-		        Console.WriteLine($"{kvp.Key.ma},{kvp.Key.pct},{avg:F2}");
-		    }
 		}
 		
 		private static void TestMainStrategy2(IList<StockPrice> dataPoints)
@@ -816,7 +661,7 @@ namespace MakeMoneyApp
 		                // Фильтры против переобучения
 		                if (tradeCount >= 20 &&                
 		                    finalProfitRatio > 1.5m &&        // Минимум 50% прибыли 
-		                    maxDrawdown < 60m && 
+		                    maxDrawdown < 0.6m && 
 		                    profitFactor > 1.6m)   
 		                {
 			                var key = (maDays, emaDays);
@@ -839,7 +684,7 @@ namespace MakeMoneyApp
 		            }
 		        });
 
-		        Console.WriteLine($"Оптимизация до {monthlyGroups[isEndMonth-1][0].Date:yyyy-MM} → лучшие: MA={bestMa} EMA={bestEma} (сделок: {bestTrades})");
+		        Console.WriteLine($"Оптимизация от {monthlyGroups[0][0].Date:yyyy-MM} до {monthlyGroups[isEndMonth-1][0].Date:yyyy-MM} → лучшие: MA={bestMa} EMA={bestEma} (сделок: {bestTrades})");
 
 				// OOS тест
 		        var oosData = monthlyGroups.Skip(isEndMonth).Take(oosEndMonth - isEndMonth).SelectMany(x => x).ToList();
@@ -852,7 +697,7 @@ namespace MakeMoneyApp
 
 				        // Фильтры против переобучения
 				        if (tradeCount >= 6 &&                
-				            finalProfitRatio > 1.1m &&        // Минимум 50% прибыли 
+				            finalProfitRatio > 1.1m && 
 				            maxDrawdown < 60m && 
 				            profitFactor > 1.6m)   
 				        {
@@ -884,7 +729,7 @@ namespace MakeMoneyApp
 		    foreach (var eq in equityCurve)
 		        Console.WriteLine(eq.ToString("F2"));
 		    
-		    ShowHeatMap(heatMap.ToDictionary());
+		    ShowHeatMap(heatMap.ToDictionary(), false);
 		}
 		
 		private static (decimal, string) Strategy2(

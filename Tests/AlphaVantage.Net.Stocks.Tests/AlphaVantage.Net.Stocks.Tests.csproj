@@ -10,9 +10,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\AlphaVantage.Net.Stocks\AlphaVantage.Net.Stocks.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="StockDataParserTests\Data\intraday.json" />
   </ItemGroup>
   <ItemGroup>
