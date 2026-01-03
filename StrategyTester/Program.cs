@@ -3,8 +3,6 @@ using CodeJam.Threading;
 using DataModels;
 using JetBrains.Annotations;
 using LinqToDB.Data;
-using ScottPlot;
-using ScottPlot.WinForms;
 
 namespace StrategyTester
 {
@@ -43,7 +41,7 @@ namespace StrategyTester
 
 			dataPoints = dataPoints.SkipWhile(dp => dp.Date < fromDate).Where(dp => dp.Date < toDate).ToList();
 
-			TestMainStrategy2(dataPoints);
+			TestMainStrategy2(security, dataPoints);
 
 			var strategies = new InvestmentStrategy[]
 			{
@@ -76,173 +74,15 @@ namespace StrategyTester
 
 			decimal record = 0;
 			
-
-			if (IsBelowMaAndEma(dataPoints, 27, 9, 5))
+			if (IsBelowMaAndEma(security, dataPoints, 27, 9, 5))
 				Console.WriteLine("Below MA & EMA!");
 	
 			Console.WriteLine("Done");
 			Console.ReadLine();
 		}
-	
-		private static void ShowHeatMap(Dictionary<(int x, int y), List<decimal>> heatMap, bool labelValues)
-		{
-			/*
-			heatMap = new Dictionary<(int x, int y), List<decimal>>();
-			heatMap[(0, 4)] = new List<decimal>() { 1 };
-			heatMap[(0, 5)] = new List<decimal>() { 2 };
-			heatMap[(0, 6)] = new List<decimal>() { 3 };
-			heatMap[(1, 4)] = new List<decimal>() { 4 };
-			heatMap[(1, 5)] = new List<decimal>() { 5 };
-			heatMap[(1, 6)] = new List<decimal>() { 6 };
-			heatMap[(2, 4)] = new List<decimal>() { 7 };
-			heatMap[(2, 5)] = new List<decimal>() { 8 };
-			heatMap[(2, 6)] = new List<decimal>() { 9 };
-			*/
-			
-			var maSet =  heatMap.Keys.Select(k => k.x).Distinct().OrderBy(x => x);
-			var emaSet = heatMap.Keys.Select(k => k.y).Distinct().OrderBy(x => x);
-
-			int[] xValues = maSet.ToArray();       // например: [30, 35, 40, ..., 150]
-			int[] yValues = emaSet.ToArray(); // например: [6, 7, 8, ..., 22]
-
-			int cols = xValues.Length;       // высота = количество разных maDays
-			int rows = yValues.Length;  // ширина = количество разных процентов
-
-			double[,] data = new double[rows, cols];
-			
-			for (int row = 0; row < rows; row++)
-			{
-				int ema = yValues[row];
-
-				for (int col = 0; col < cols; col++)
-				{
-					int ma = xValues[col];
-
-					if (heatMap.TryGetValue((ma, ema), out var list) && list.Count > 0)
-					{
-						data[yValues.Length - 1 - row, col] = (double)list.Average();
-					}
-					else
-					{
-						data[yValues.Length - 1 - row, col] = double.NaN; // пустые ячейки
-					}
-				}
-			}
-
-			var plot = new ScottPlot.Plot();
-
-			var hm = plot.Add.Heatmap(data);
-			hm.Colormap = new ScottPlot.Colormaps.Turbo();
-			hm.Smooth = true;
-
-			if (labelValues)
-			{
-				for (int y = 0; y < data.GetLength(0); y++)
-				for (int x = 0; x < data.GetLength(1); x++)
-				{
-					Coordinates coordinates = new(x, y);
-					string cellLabel = data[yValues.Length - 1 - y, x].ToString("0.0");
-					var text = plot.Add.Text(cellLabel, coordinates);
-					text.Alignment = Alignment.MiddleCenter;
-					text.LabelFontSize = 30;
-					text.LabelFontColor = Colors.White;
-				}
-			}
-
-			// axis titles
-			plot.Title("HeatMap");
-			plot.XLabel("MA Days");
-			plot.YLabel("EMA Days");
-
-			// map indices -> your X/Y values using manual ticks
-			double[] xPositions = Enumerable.Range(0, xValues.Length)
-				.Select(i => (double)i)
-				.ToArray();
-
-			double[] yPositions = Enumerable.Range(0, yValues.Length)
-				.Select(i => (double)i)
-				.ToArray();
-
-			plot.Axes.Bottom.SetTicks(
-				xPositions,
-				xValues.Select(v => v.ToString()).ToArray()
-			);
-
-			plot.Axes.Left.SetTicks(
-				yPositions,
-				yValues.Select(v => v.ToString()).ToArray()
-			);
-
-			// optional but keeps the heatmap tightly framed with half-cell padding
-			plot.Axes.SetLimits(left: -0.5, right: cols - 0.5, bottom: -0.5, top: rows - 0.5);
-
-			var cb = plot.Add.ColorBar(hm);
-			cb.Label = "Profit ratio";
-			///cb.LabelStyle.FontSize = 24;
-
-			FormsPlotViewer.Launch(plot);
-		}
 
 		private static object _syncObj = new();
 
-		/*
-		private static void TestMainStrategy(IList<StockPrice> dataPoints)
-		{
-			decimal record = 0;
-
-			ParallelExtensions.RunInParallel(Enumerable.Range(15, 186), Environment.ProcessorCount - 1, maDays =>
-			{
-				for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
-				for (int upPercent = 2; upPercent <= 15; upPercent++) 
-				//for (int downPercent = 2; downPercent <= 40; downPercent++)
-				{
-					int downPercent = upPercent;
-					var (result, debug, trades) = MainStrategy(dataPoints, maDays, emaDays, upPercent, upPercent);
-					//var (result, debug) = testStratFunc(dataPoints, maDays, emaDays, upPercent, upPercent);
-
-					if (result > record)
-					{
-						record = result;
-
-						lock (_consoleSync)
-						{
-							Console.WriteLine(
-								$"New record found: {record} params: {maDays} {emaDays} {upPercent} {downPercent}");
-
-							Console.WriteLine(debug);
-						}
-					}
-				}
-			});
-		}
-		*/
-
-		private static void TestStrategy2(IList<StockPrice> dataPoints)
-		{
-			decimal record = 0;
-
-			ParallelExtensions.RunInParallel(Enumerable.Range(15, 186), Environment.ProcessorCount - 1, maDays =>
-			{
-				for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
-				{
-					var (result, debug) = Strategy2(dataPoints, maDays, emaDays);
-
-					if (result > record)
-					{
-						record = result;
-
-						lock (_consoleSync)
-						{
-							Console.WriteLine(
-								$"New record found: {record} params: {maDays} {emaDays}");
-
-							Console.WriteLine(debug);
-						}
-					}
-				}
-			});
-		}
-		
 		[UsedImplicitly]
 		private static void Rebalance(decimal amount, string ticker1, string ticker2, DateTime fromDate)
 		{
@@ -339,13 +179,11 @@ namespace StrategyTester
 
 					var prices = _client.GetLast10YearsOfPrices(mySecurity);
 
-					if (IsBelowMaAndEma(prices, 27, 9, 5))
+					if (IsBelowMaAndEma(mySecurity, prices, 27, 9, 5))
 						Console.WriteLine($"{mySecurity} is below MA & EMA!");
 
-					if (IsAboveMaAndEma(prices, 27, 9, 5))
+					if (IsAboveMaAndEma(mySecurity, prices, 27, 9, 5))
 						Console.WriteLine($"{mySecurity} is above MA & EMA!");
-
-					ClearMaAndEmaDict();
 
 					Thread.Sleep(3000);
 				}
@@ -356,20 +194,15 @@ namespace StrategyTester
 			}
 		}
 
-		private static void ClearMaAndEmaDict()
-		{
-			_maDict.Clear();
-			_emaDict.Clear();
-		}
-
 		private static bool IsBelowMaAndEma(
+			string ticker,
 			IList<StockPrice> dataPoints,
 			int maDays,
 			int emaDays,
 			decimal percent)
 		{
-			var ma  = MovingAverage(dataPoints, maDays, dataPoints.Count - 1);
-			var ema = ExponentialMovingAverage(dataPoints, emaDays, dataPoints.Count - 1);
+			var ma  = IndicatorFunctions.MovingAverage(ticker, dataPoints, maDays, dataPoints.Count - 1);
+			var ema = IndicatorFunctions.ExponentialMovingAverage(ticker, dataPoints, emaDays, dataPoints.Count - 1);
 
 			if (ma == null || ema == null)
 				return false;
@@ -380,13 +213,14 @@ namespace StrategyTester
 		}
 
 		private static bool IsAboveMaAndEma(
+			string ticker,
 			IList<StockPrice> dataPoints,
 			int maDays,
 			int emaDays,
 			decimal percent)
 		{
-			var ma = MovingAverage(dataPoints, maDays, dataPoints.Count - 1);
-			var ema = ExponentialMovingAverage(dataPoints, emaDays, dataPoints.Count - 1);
+			var ma = IndicatorFunctions.MovingAverage(ticker, dataPoints, maDays, dataPoints.Count - 1);
+			var ema = IndicatorFunctions.ExponentialMovingAverage(ticker, dataPoints, emaDays, dataPoints.Count - 1);
 
 			if (ma == null || ema == null)
 				return false;
@@ -416,6 +250,7 @@ namespace StrategyTester
 		}
 
 		private static (decimal FinalCash, string Debug, int TradeCount, decimal MaxDrawdown, decimal ProfitFactor) MainStrategy(
+			string ticker,
 			IList<StockPrice> dataPoints,
 			int maDays,
 			int emaDays,
@@ -451,8 +286,8 @@ namespace StrategyTester
 				if (cash > 0 && !canSell)
 					continue;
 
-				var ma = MovingAverage(dataPoints, maDays, i);
-				var ema = ExponentialMovingAverage(dataPoints, emaDays, i);
+				var ma = IndicatorFunctions.MovingAverage(ticker, dataPoints, maDays, i);
+				var ema = IndicatorFunctions.ExponentialMovingAverage(ticker, dataPoints, emaDays, i);
 
 				if (ma == null || ema == null)
 					continue;
@@ -516,103 +351,7 @@ namespace StrategyTester
 			return (cash, debug, tradeCount, maxDrawdown, profitFactor);
 		}
 		
-		private static (decimal finalProfitRatio, string Debug, int TradeCount, decimal MaxDrawdown, decimal ProfitFactor) MainStrategy2(
-			IList<StockPrice> dataPoints,
-			int maDays,
-			int emaDays)
-		{
-			decimal initialInvestment = 1000;
-			decimal cash = initialInvestment;
-
-			decimal shares = cash / dataPoints[0].ClosingPrice;
-			var lastBuy = dataPoints[0];
-
-			decimal peak = initialInvestment;
-			decimal maxDrawdown = 0m;
-			decimal grossProfit = 0m;
-			decimal grossLoss = 0m;
-			int winningTrades = 0;
-			int losingTrades = 0;
-
-			string debug = InvestmentStrategy.GetBuyingSharesAtForString(dataPoints[0], cash);
-
-			cash = 0;
-			int tradeCount = 0;
-
-			for (int i = 0; i < dataPoints.Count; i++)
-			{
-				var dp = dataPoints[i];
-				decimal price = dp.ClosingPrice;
-
-				bool canSell = dp.Date.Date - lastBuy.Date.Date > TimeSpan.FromDays(_holdingPeriodDays);
-
-				if (cash > 0 && !canSell)
-					continue;
-
-				var ma = MovingAverage(dataPoints, maDays, i);
-				var maPrev = MovingAverage(dataPoints, maDays, i - 1);
-				var ema = ExponentialMovingAverage(dataPoints, emaDays, i);
-				var emaPrev = ExponentialMovingAverage(dataPoints, emaDays, i - 1);
-
-				if (ma == null || ema == null)
-					continue;
-
-				if (shares > 0 && emaPrev > maPrev && ema < ma)
-				{
-					string str = $"{dp.Date:d} Selling {shares:N} shares at {price:C} for  {shares * price:C}\n";
-					debug += str;
-
-					cash = shares * price;
-					shares = 0;
-
-					tradeCount++;
-					
-					decimal pnl = (price / lastBuy.ClosingPrice - 1m);
-					if (pnl > 0)
-					{
-						grossProfit += cash * pnl;  // или просто pnl в процентах
-						winningTrades++;
-					}
-					else
-					{
-						grossLoss -= cash * pnl;   // grossLoss всегда положительный
-						losingTrades++;
-					}
-
-					// Обновление просадки
-					if (cash > peak) peak = cash;
-					decimal currentDrawdownFromPeak = (peak - cash) / peak;
-					if (currentDrawdownFromPeak > maxDrawdown) maxDrawdown = currentDrawdownFromPeak;
-				}
-				// if price is below  MA and above EMA - buy
-				else if (cash > 0 && emaPrev < maPrev && ema > ma)
-				{
-					string str = $"{dp.Date:d} Buying {cash / price:N} shares at {price:C} for  {cash:C}\n";
-					debug += str;
-
-					shares = cash / price;
-					cash = 0;
-					lastBuy = dp;
-
-					tradeCount++;
-				}
-			}
-
-			var lastPrice = dataPoints.Last().ClosingPrice;
-
-			if (cash == 0)
-				cash = shares * lastPrice;
-
-			var years = Helpers.GetYears(dataPoints);
-			var avgPercent = Helpers.GetAvgPercentPerYear(initialInvestment, cash, years);
-			debug += $"Avg year %: {avgPercent:N}";
-
-			decimal profitFactor = grossLoss == 0 ? 999m : grossProfit / grossLoss;
-			
-			return (cash / initialInvestment, debug, tradeCount, maxDrawdown, profitFactor);
-		}
-		
-		private static void TestMainStrategy2(IList<StockPrice> dataPoints)
+		private static void TestMainStrategy2(string ticker, IList<StockPrice> dataPoints)
 		{
 			const int minMA = 25;
 			const int maCount = 75;
@@ -649,41 +388,42 @@ namespace StrategyTester
 		        decimal record = decimal.MinValue;
 		        int bestMa = 0, bestEma = 0;
 		        string bestDebug = "";
-		        int bestTrades = 0;
+		        int bestTradesCount = 0;
 
 		        ParallelExtensions.RunInParallel(Enumerable.Range(minMA, maCount), Environment.ProcessorCount - 1, maDays =>
 		        {
 		            for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
 		            {
-		                var (finalProfitRatio, debug, tradeCount, maxDrawdown, profitFactor) = MainStrategy2(isData, maDays, emaDays);
+			            var maCrossOverStrategy = new MACrossOverStrategy(ticker, isData, emaDays, maDays);
+			            var runReport = maCrossOverStrategy.Run();
 
 		                // Фильтры против переобучения
-		                if (tradeCount >= 20 &&                
-		                    finalProfitRatio > 1.5m &&        // Минимум 50% прибыли 
-		                    maxDrawdown < 0.6m && 
-		                    profitFactor > 1.6m)   
+		                if (runReport.TotalTradeCount >= 20 &&                
+		                    runReport.FinalProfitRatio > 1.5m &&        // Минимум 50% прибыли 
+		                    runReport.MaxDrawdownPercent < 60 && 
+		                    runReport.ProfitFactor > 1.6m)   
 		                {
 			                var key = (maDays, emaDays);
 			                if (!heatMap.ContainsKey(key))
 				                heatMap[key] = new List<decimal>();
-			                heatMap[key].Add(finalProfitRatio);
+			                heatMap[key].Add(runReport.FinalProfitRatio);
 
 			                lock (_syncObj)
 		                    {
-		                        if (finalProfitRatio > record)
+		                        if (runReport.FinalProfitRatio > record)
 		                        {
-		                            record = finalProfitRatio;
+		                            record = runReport.FinalProfitRatio;
 		                            bestMa = maDays;
 		                            bestEma = emaDays;
-		                            bestDebug = debug;
-		                            bestTrades = tradeCount;
+		                            bestDebug = runReport.Debug;
+		                            bestTradesCount = runReport.TotalTradeCount;
 		                        }
 		                    }
 		                }
 		            }
 		        });
 
-		        Console.WriteLine($"Оптимизация от {monthlyGroups[0][0].Date:yyyy-MM} до {monthlyGroups[isEndMonth-1][0].Date:yyyy-MM} → лучшие: MA={bestMa} EMA={bestEma} (сделок: {bestTrades})");
+		        Console.WriteLine($"Оптимизация от {monthlyGroups[0][0].Date:yyyy-MM} до {monthlyGroups[isEndMonth-1][0].Date:yyyy-MM} → лучшие: MA={bestMa} EMA={bestEma} (сделок: {bestTradesCount})");
 
 				// OOS тест
 		        var oosData = monthlyGroups.Skip(isEndMonth).Take(oosEndMonth - isEndMonth).SelectMany(x => x).ToList();
@@ -692,28 +432,29 @@ namespace StrategyTester
 		        {
 			        for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
 			        {
-				        var (finalProfitRatio, debug, tradeCount, maxDrawdown, profitFactor) = MainStrategy2(oosData, maDays, emaDays);
+				        var maCrossOverStrategy = new MACrossOverStrategy(ticker, isData, emaDays, maDays);
+				        var runReport = maCrossOverStrategy.Run();
 
 				        // Фильтры против переобучения
-				        if (tradeCount >= 6 &&                
-				            finalProfitRatio > 1.1m && 
-				            maxDrawdown < 60m && 
-				            profitFactor > 1.6m)   
+				        if (runReport.TotalTradeCount >= 6 &&                
+				            runReport.FinalProfitRatio > 1.1m && 
+				            runReport.MaxDrawdownPercent < 60m && 
+				            runReport.ProfitFactor > 1.6m)   
 				        {
 					        var key = (maDays, emaDays);
 					        if (!heatMap.ContainsKey(key))
 						        heatMap[key] = new List<decimal>();
-					        heatMap[key].Add(finalProfitRatio);
+					        heatMap[key].Add(runReport.FinalProfitRatio);
 
 					        lock (_syncObj)
 					        {
-						        if (finalProfitRatio > record)
+						        if (runReport.FinalProfitRatio > record)
 						        {
-							        record = finalProfitRatio;
+							        record = runReport.FinalProfitRatio;
 							        bestMa = maDays;
 							        bestEma = emaDays;
-							        bestDebug = debug;
-							        bestTrades = tradeCount;
+							        bestDebug = runReport.Debug;
+							        bestTradesCount = runReport.TotalTradeCount;
 						        }
 					        }
 				        }
@@ -727,122 +468,8 @@ namespace StrategyTester
 		    Console.WriteLine("\nEquity Curve:");
 		    foreach (var eq in equityCurve)
 		        Console.WriteLine(eq.ToString("F2"));
-		    
-		    ShowHeatMap(heatMap.ToDictionary(), false);
-		}
-		
-		private static (decimal, string) Strategy2(
-			IList<StockPrice> dataPoints,
-			int maDays,
-			int emaDays)
-		{
-			decimal initialInvestment = 1000;
-			decimal cash = initialInvestment;
 
-			decimal shares = cash / dataPoints[0].ClosingPrice;
-			var lastBuy = dataPoints[0];
-
-			string debug = InvestmentStrategy.GetBuyingSharesAtForString(dataPoints[0], cash);
-
-			cash = 0;
-
-			for (int i = 0; i < dataPoints.Count; i++)
-			{
-				var dp = dataPoints[i];
-				decimal price = dp.ClosingPrice;
-
-				bool canSell = dp.Date.Date - lastBuy.Date.Date > TimeSpan.FromDays(_holdingPeriodDays);
-
-				if (cash > 0 && !canSell)
-					continue;
-
-				var ma = MovingAverage(dataPoints, maDays, i);
-				var maPrevDay = MovingAverage(dataPoints, maDays, i - 1);
-				var ema = ExponentialMovingAverage(dataPoints, emaDays, i);
-				var emaPrevDay = ExponentialMovingAverage(dataPoints, emaDays, i - 1);
-
-				if (ma == null || ema == null)
-					continue;
-
-				// if EMA goes below MA - sell
-				if (ema < ma && emaPrevDay > maPrevDay)
-				{
-					string str = $"{dp.Date:d} Selling {shares:N} shares at {price:C} for  {shares * price:C}\n";
-					debug += str;
-
-					cash = shares * price;
-					shares = 0;
-				}
-				// if EMA goes above MA - sell
-				else if (ema > ma && emaPrevDay < maPrevDay)
-				{
-					string str = $"{dp.Date:d} Buying {cash / price:N} shares at {price:C} for  {cash:C}\n";
-					debug += str;
-
-					shares = cash / price;
-					cash = 0;
-					lastBuy = dp;
-				}
-			}
-
-			var lastPrice = dataPoints.Last().ClosingPrice;
-
-			if (cash == 0)
-				cash = shares * lastPrice;
-
-			var years = Helpers.GetYears(dataPoints);
-			var avgPercent = Helpers.GetAvgPercentPerYear(initialInvestment, cash, years);
-			debug += $"Avg year %: {avgPercent:N}";
-
-			return (cash, debug);
-		}
-
-		private static ConcurrentDictionary<(int periods, int currentDayIndex), decimal> _maDict = new ConcurrentDictionary<(int periods, int currentDayIndex), decimal>();
-		private static ConcurrentDictionary<(int periods, int currentDayIndex), decimal> _emaDict = new ConcurrentDictionary<(int periods, int currentDayIndex), decimal>();
-
-		private static decimal? MovingAverage(IList<StockPrice> dataPoints, int periods, int currentDayIndex)
-		{
-			if (currentDayIndex < periods) return null;
-
-			if (_maDict.TryGetValue((periods, currentDayIndex), out decimal res))
-				return res;
-
-			decimal sum = 0;
-
-			for (int i = currentDayIndex; i > currentDayIndex - periods; i--)
-			{
-				sum += dataPoints[i].ClosingPrice;
-			}
-
-			return _maDict[(periods, currentDayIndex)] = sum / periods;
-		}
-
-		public static decimal? ExponentialMovingAverage(IList<StockPrice> dataPoints, int periods, int currentDayIndex)
-		{
-			if (currentDayIndex < periods - 1) return null;  // Need at least 'periods' points for SMA seed
-
-			var alpha = 2m / (periods + 1m);
-
-			// Allocate array for all EMAs up to currentDayIndex (0-based indexing)
-			var emas = new decimal[currentDayIndex + 1];
-
-			// Step 1: Seed the first EMA as SMA of first 'periods' closing prices
-			decimal sma = 0m;
-			for (int i = 0; i < periods; i++)
-			{
-				sma += dataPoints[i].ClosingPrice;
-			}
-			emas[periods - 1] = sma / periods;  // EMA at index periods-1
-
-			var sma2 = MovingAverage(dataPoints, periods, dataPoints.Count - 1);
-
-			// Step 2: Recurse forward from seed to currentDayIndex
-			for (int i = periods; i <= currentDayIndex; i++)
-			{
-				emas[i] = alpha * dataPoints[i].ClosingPrice + (1 - alpha) * emas[i - 1];
-			}
-
-			return emas[currentDayIndex];
+		    ScottPlotHelper.ShowHeatMap(heatMap.ToDictionary(), false);
 		}
 
 	}

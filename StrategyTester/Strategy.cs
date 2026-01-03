@@ -32,7 +32,59 @@
 			DescriptionAndParameters = descriptionAndParameters;
 			DataPoints               = dataPoints;
 		}
+		
+		public RunReport Run()
+		{
+			Initialize();
+			
+			for (int i = 0; i < DataPoints.Count; i++)
+			{
+				if (!CalcDailyParametersAndDecideIfCanBuyOrSell(i))
+					continue;
 
+				if (Shares > 0 && IsExit())
+				{
+					Sell(DataPoints[i]);
+				}
+				// if price is below  MA and above EMA - buy
+				else if (Cash > 0 && IsEnter())
+				{
+					Buy(DataPoints[i]);
+				}
+			}
+
+			var lastPrice = DataPoints.Last().ClosingPrice;
+
+			if (Cash == 0)
+				Cash = Shares * lastPrice;
+
+			var avgPercent = Helpers.GetAvgPercentPerYear(InitialInvestment, Cash, Helpers.GetYears(DataPoints));
+			Debug += $"Avg year %: {avgPercent:N}";
+
+			decimal profitFactor = GrossLoss == 0 ? 9999m : GrossProfit / GrossLoss;
+
+			var returnToDrawdownRatio = MaxDrawdownPercent <= 0.0001m  // treat near-zero as zero
+				? avgPercent > 0 
+					? 9999m 
+					: 0m 
+				: (decimal) avgPercent / MaxDrawdownPercent;
+
+			return new RunReport(
+				Name,
+				DescriptionAndParameters,
+				DataPoints[0].Date,
+				DataPoints.Last().Date,
+				Cash / InitialInvestment,
+				TotalTradeCount,
+				TotalTradeCount / (decimal)(DataPoints.Last().Date - DataPoints[0].Date).TotalDays / 365,
+				MaxDrawdownPercent,
+				returnToDrawdownRatio,
+				profitFactor,
+				Debug);
+		}
+
+		protected abstract void Initialize();
+		
 		protected virtual void Initialize(bool buyOnFirstDay)
 		{
 			Cash        = InitialInvestment;
@@ -47,7 +99,7 @@
 			}
 		}
 
-		protected abstract bool CalcDailyParametersAndDecideIfCanBuyOrSell(StockPrice dp);
+		protected abstract bool CalcDailyParametersAndDecideIfCanBuyOrSell(int currentIndex);
 
 		protected void Buy(StockPrice dp)
 		{
@@ -89,5 +141,8 @@
 			if (currentDrawdownFromPeak > MaxDrawdownPercent)
 				MaxDrawdownPercent = currentDrawdownFromPeak;
 		}
+
+		protected abstract bool IsEnter();
+		protected abstract bool IsExit();
 	}
 }
