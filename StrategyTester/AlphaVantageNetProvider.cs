@@ -1,10 +1,8 @@
-﻿using OoplesFinance.YahooFinanceAPI.Enums;
-using OoplesFinance.YahooFinanceAPI;
-using System.Collections.Generic;
-using System.Linq;
-using AlphaVantage.Net.Stocks.TimeSeries;
+﻿using AlphaVantage.Net.Core.Client;
 using AlphaVantage.Net.Stocks;
-using System;
+using AlphaVantage.Net.Common.Size;
+using AlphaVantage.Net.Stocks.Client;
+using AlphaVantage.Net.Common.Intervals;
 
 namespace StrategyTester
 {
@@ -14,18 +12,18 @@ namespace StrategyTester
 	/// </summary>
 	public class AlphaVantageNetProvider : IStockPriceProvider
 	{
-		private AlphaVantageStocksClient _client;
+		private StocksClient _client;
 
 		public AlphaVantageNetProvider(string apiKey)
 		{
-			_client = new AlphaVantageStocksClient(apiKey);
+			_client = new AlphaVantageClient(apiKey).Stocks();
 		}
 		
 		public IList<StockPrice> GetLast10YearsOfPrices(string ticker)
 		{
-			var res = _client.RequestDailyTimeSeriesAsync(ticker, TimeSeriesSize.Full, false).Result;
+			StockTimeSeries res = _client.GetTimeSeriesAsync(ticker, Interval.Daily, OutputSize.Full, isAdjusted: true).Result;
 
-			return res.DataPoints.Cast<StockDataPoint>().Reverse().Select(x => new StockPrice(x.Time, x.ClosingPrice)).ToList();
+			return res.DataPoints.Reverse().Select(x => new StockPrice(x.Time, x.ClosingPrice)).ToList();
 		}
 	}
 }

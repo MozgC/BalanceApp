@@ -15,15 +15,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CodeJam" Version="3.1.0" />
-    <PackageReference Include="linq2db.SQLite" Version="3.1.4" />
+    <PackageReference Include="AlphaVantage.Net.Common" Version="2.0.2" />
+    <PackageReference Include="AlphaVantage.Net.Core" Version="2.0.2" />
+    <PackageReference Include="AlphaVantage.Net.Stocks" Version="2.0.2" />
+    <PackageReference Include="CodeJam" Version="4.1.0" />
+    <PackageReference Include="linq2db" Version="6.1.0" />
+    <PackageReference Include="linq2db.SQLite" Version="6.1.0" />
     <PackageReference Include="OoplesFinance.YahooFinanceAPI" Version="1.7.1" />
     <PackageReference Include="ScottPlot.WinForms" Version="5.1.57" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\3rdPartyProjects\AlphaVantage.Net.Core\AlphaVantage.Net.Core.csproj" />
-    <ProjectReference Include="..\3rdPartyProjects\AlphaVantage.Net.Stocks\AlphaVantage.Net.Stocks.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,7 +31,7 @@
     </None>
     <None Update="DataModel.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>DataModel.cs</LastGenOutput>
+      <LastGenOutput>DataModel.generated.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
@@ -41,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="DataModel.cs">
+    <Compile Update="DataModel.generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>DataModel.tt</DependentUpon>

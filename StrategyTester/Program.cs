@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using StrategyTester;
 using CodeJam.Threading;
 using DataModels;
 using JetBrains.Annotations;
@@ -322,10 +321,10 @@ namespace StrategyTester
 		[UsedImplicitly]
 		private static void SaveToDb(string name, IList<StockPrice> dataPoints)
 		{
-			using (var db = new MakeMoneyDB("MakeMoneyDB"))
+			using (var db = new StrategyTesterDB("MakeMoneyDB"))
 			{
 				db.BulkCopy(dataPoints.Select(dp => new InstrumentPrice
-				{ Name = name, Date = dp.Date, ClosingPrice = dp.ClosingPrice }));
+				{ Name = name, Date = dp.Date, AdjustedClosingPrice = dp.ClosingPrice }));
 			}
 		}
 

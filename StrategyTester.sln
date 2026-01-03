@@ -3,19 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaVantage.Net.Core", "3rdPartyProjects\AlphaVantage.Net.Core\AlphaVantage.Net.Core.csproj", "{364F9801-6D5E-1CD5-0E34-024CE367BB4E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaVantage.Net.Stocks", "3rdPartyProjects\AlphaVantage.Net.Stocks\AlphaVantage.Net.Stocks.csproj", "{5D8BC309-1EC5-F26D-A0BD-1B1B1E3A94A2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaVantage.Net.Stocks.Tests", "Tests\AlphaVantage.Net.Stocks.Tests\AlphaVantage.Net.Stocks.Tests.csproj", "{F27E7E4F-A0A8-6531-1751-B78F300D7933}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaVantage.Net.Core.Tests", "Tests\AlphaVantage.Net.Core.Tests\AlphaVantage.Net.Core.Tests.csproj", "{EF334DB1-5EFC-5CF5-B948-4AC091BF5DA9}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A5F1C68C-85E8-4B2B-A297-A2C65C3159A1}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3rdPartyProjects", "3rdPartyProjects", "{16742CBC-DCA0-4751-9A81-DDCFAC700E81}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrategyTester", "StrategyTester\StrategyTester.csproj", "{00B8E464-1D5D-21B0-C24A-8F7756E2484B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{36258BEE-6642-462F-9178-5911794D2428}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,22 +18,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{364F9801-6D5E-1CD5-0E34-024CE367BB4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{364F9801-6D5E-1CD5-0E34-024CE367BB4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{364F9801-6D5E-1CD5-0E34-024CE367BB4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{364F9801-6D5E-1CD5-0E34-024CE367BB4E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5D8BC309-1EC5-F26D-A0BD-1B1B1E3A94A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5D8BC309-1EC5-F26D-A0BD-1B1B1E3A94A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5D8BC309-1EC5-F26D-A0BD-1B1B1E3A94A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5D8BC309-1EC5-F26D-A0BD-1B1B1E3A94A2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F27E7E4F-A0A8-6531-1751-B78F300D7933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F27E7E4F-A0A8-6531-1751-B78F300D7933}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F27E7E4F-A0A8-6531-1751-B78F300D7933}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F27E7E4F-A0A8-6531-1751-B78F300D7933}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF334DB1-5EFC-5CF5-B948-4AC091BF5DA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF334DB1-5EFC-5CF5-B948-4AC091BF5DA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF334DB1-5EFC-5CF5-B948-4AC091BF5DA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF334DB1-5EFC-5CF5-B948-4AC091BF5DA9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{00B8E464-1D5D-21B0-C24A-8F7756E2484B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{00B8E464-1D5D-21B0-C24A-8F7756E2484B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00B8E464-1D5D-21B0-C24A-8F7756E2484B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -46,12 +25,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{364F9801-6D5E-1CD5-0E34-024CE367BB4E} = {16742CBC-DCA0-4751-9A81-DDCFAC700E81}
-		{5D8BC309-1EC5-F26D-A0BD-1B1B1E3A94A2} = {16742CBC-DCA0-4751-9A81-DDCFAC700E81}
-		{F27E7E4F-A0A8-6531-1751-B78F300D7933} = {A5F1C68C-85E8-4B2B-A297-A2C65C3159A1}
-		{EF334DB1-5EFC-5CF5-B948-4AC091BF5DA9} = {A5F1C68C-85E8-4B2B-A297-A2C65C3159A1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3D2F0BE-3263-410C-97F6-AFCA4332C0F2}

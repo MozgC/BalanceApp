@@ -25,6 +25,9 @@
 			if (Cash > 0 && !canSell)
 				return false;
 
+			//todo:
+			int i = 10;
+			
 			var ma      = IndicatorFunctions.MovingAverage(Ticker, DataPoints, _maDays, i);
 			var maPrev  = IndicatorFunctions.MovingAverage(Ticker, DataPoints, _maDays, i - 1);
 			var ema     = IndicatorFunctions.ExponentialMovingAverage(Ticker, DataPoints, _emaDays, i);
@@ -32,6 +35,8 @@
 
 			if (ma == null || ema == null)
 				return false;
+
+			return true;
 		}
 
 		public RunReport Run()
@@ -99,7 +104,7 @@
 
 		public bool IsEnter()
 		{
-			
+			return true;
 		}
 	}
 }
