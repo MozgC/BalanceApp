@@ -1,6 +1,6 @@
 ﻿namespace StrategyTester
 {
-	public class Strategy
+	public abstract class Strategy
 	{
 		public    string     Name;
 		public    string     DescriptionAndParameters;
@@ -46,6 +46,8 @@
 				Cash        = 0;
 			}
 		}
+
+		protected abstract bool CalcDailyParametersAndDecideIfCanBuyOrSell(StockPrice dp);
 
 		protected void Buy(StockPrice dp)
 		{

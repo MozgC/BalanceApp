@@ -16,6 +16,24 @@
 			_maDays  = maDays;
 		}
 
+		protected override bool CalcDailyParametersAndDecideIfCanBuyOrSell(StockPrice dp)
+		{
+			decimal price = dp.ClosingPrice;
+
+			bool canSell = HoldingPeriodDays == 0 || dp.Date.Date - LastBuy.Date.Date > TimeSpan.FromDays(HoldingPeriodDays);
+
+			if (Cash > 0 && !canSell)
+				return false;
+
+			var ma      = IndicatorFunctions.MovingAverage(Ticker, DataPoints, _maDays, i);
+			var maPrev  = IndicatorFunctions.MovingAverage(Ticker, DataPoints, _maDays, i - 1);
+			var ema     = IndicatorFunctions.ExponentialMovingAverage(Ticker, DataPoints, _emaDays, i);
+			var emaPrev = IndicatorFunctions.ExponentialMovingAverage(Ticker, DataPoints, _emaDays, i - 1);
+
+			if (ma == null || ema == null)
+				return false;
+		}
+
 		public RunReport Run()
 		{
 			Initialize(true);
