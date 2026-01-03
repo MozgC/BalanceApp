@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
-using StrategyTester;
 
-namespace ClientPlayground;
+namespace StrategyTester;
 
 public abstract class InvestmentStrategy
 {

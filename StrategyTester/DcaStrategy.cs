@@ -2,7 +2,7 @@
 using System.Linq;
 using StrategyTester;
 
-namespace ClientPlayground;
+namespace StrategyTester;
 
 public class DcaStrategy : InvestmentStrategy
 {

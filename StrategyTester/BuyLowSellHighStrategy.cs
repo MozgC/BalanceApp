@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using StrategyTester;
 
-namespace ClientPlayground;
+namespace StrategyTester;
 
 public class BuyLowSellHighStrategy : InvestmentStrategy
 {

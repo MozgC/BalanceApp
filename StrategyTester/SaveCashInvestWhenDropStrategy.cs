@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using StrategyTester;
 
-namespace ClientPlayground;
+namespace StrategyTester;
 
 /// <summary>
 /// Each month we save X dollars, when the stock price drops by Y percent from the maximum in Z days, we invest all cash

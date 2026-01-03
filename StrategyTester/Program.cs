@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using ClientPlayground;
+using StrategyTester;
 using CodeJam.Threading;
 using DataModels;
 using JetBrains.Annotations;
@@ -67,7 +67,7 @@ namespace StrategyTester
 			CheckForSharpDrops(dataPoints);
 
 			var buyAndHoldResult = CalcBuyAndHold(initialInvestment, dataPoints);
-			var avgPercent = GetAvgPercentPerYear(initialInvestment, buyAndHoldResult, GetYears(dataPoints));
+			var avgPercent = Helpers.GetAvgPercentPerYear(initialInvestment, buyAndHoldResult, Helpers.GetYears(dataPoints));
 
 			Console.WriteLine("Security: " + security);
 			Console.WriteLine($"Buy & Hold: {buyAndHoldResult:C}, Initial investment: {initialInvestment:C}, Avg year %: {avgPercent:N}");
@@ -508,8 +508,8 @@ namespace StrategyTester
 			if (cash == 0)
 				cash = shares * lastPrice;
 
-			var years = GetYears(dataPoints);
-			var avgPercent = GetAvgPercentPerYear(initialInvestment, cash, years);
+			var years = Helpers.GetYears(dataPoints);
+			var avgPercent = Helpers.GetAvgPercentPerYear(initialInvestment, cash, years);
 			debug += $"Avg year %: {avgPercent:N}";
 
 			decimal profitFactor = grossLoss == 0 ? 999m : grossProfit / grossLoss;
@@ -604,8 +604,8 @@ namespace StrategyTester
 			if (cash == 0)
 				cash = shares * lastPrice;
 
-			var years = GetYears(dataPoints);
-			var avgPercent = GetAvgPercentPerYear(initialInvestment, cash, years);
+			var years = Helpers.GetYears(dataPoints);
+			var avgPercent = Helpers.GetAvgPercentPerYear(initialInvestment, cash, years);
 			debug += $"Avg year %: {avgPercent:N}";
 
 			decimal profitFactor = grossLoss == 0 ? 999m : grossProfit / grossLoss;
@@ -791,21 +791,11 @@ namespace StrategyTester
 			if (cash == 0)
 				cash = shares * lastPrice;
 
-			var years = GetYears(dataPoints);
-			var avgPercent = GetAvgPercentPerYear(initialInvestment, cash, years);
+			var years = Helpers.GetYears(dataPoints);
+			var avgPercent = Helpers.GetAvgPercentPerYear(initialInvestment, cash, years);
 			debug += $"Avg year %: {avgPercent:N}";
 
 			return (cash, debug);
-		}
-
-		private static double GetYears(IList<StockPrice> dataPoints)
-		{
-			return (dataPoints.Last().Date - dataPoints[0].Date).TotalDays / 365;
-		}
-
-		private static double GetAvgPercentPerYear(decimal initialInvestment, decimal finalAmount, double years)
-		{
-			return Math.Pow((double)(finalAmount / initialInvestment), 1 / years) * 100 - 100;
 		}
 
 		private static ConcurrentDictionary<(int periods, int currentDayIndex), decimal> _maDict = new ConcurrentDictionary<(int periods, int currentDayIndex), decimal>();
