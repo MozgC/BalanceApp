@@ -46,12 +46,12 @@
 			Initialize(true);
 		}
 
-		protected override bool IsEnter()
+		protected override bool ShouldEnter()
 		{
 			return _emaPrev < _maPrev && _currentEMA > _currentMA;
 		}
 		
-		protected override bool IsExit()
+		protected override bool ShouldExit()
 		{
 			return _emaPrev > _maPrev && _currentEMA < _currentMA;
 		}

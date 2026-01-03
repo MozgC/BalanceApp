@@ -42,12 +42,12 @@
 				if (!CalcDailyParametersAndDecideIfCanBuyOrSell(i))
 					continue;
 
-				if (Shares > 0 && IsExit())
+				if (Shares > 0 && ShouldExit())
 				{
 					Sell(DataPoints[i]);
 				}
 				// if price is below  MA and above EMA - buy
-				else if (Cash > 0 && IsEnter())
+				else if (Cash > 0 && ShouldEnter())
 				{
 					Buy(DataPoints[i]);
 				}
@@ -142,7 +142,7 @@
 				MaxDrawdownPercent = currentDrawdownFromPeak;
 		}
 
-		protected abstract bool IsEnter();
-		protected abstract bool IsExit();
+		protected abstract bool ShouldEnter();
+		protected abstract bool ShouldExit();
 	}
 }

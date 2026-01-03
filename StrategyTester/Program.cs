@@ -10,7 +10,6 @@ namespace StrategyTester
 	{
 		private const string               _alphaVantage      = "90W1KG7TQ5U3LVB8";
 		private const int                  _holdingPeriodDays = 30;
-		private static readonly object     _consoleSync       = new object();
 		private static IStockPriceProvider _client;
 
 		[STAThread]
@@ -471,6 +470,5 @@ namespace StrategyTester
 
 		    ScottPlotHelper.ShowHeatMap(heatMap.ToDictionary(), false);
 		}
-
 	}
 }
