@@ -86,6 +86,8 @@
 					: 0m 
 				: (decimal) avgPercent / MaxDrawdownPercent;
 
+			decimal years = (decimal) (DataPoints.Last().Date - DataPoints[0].Date).TotalDays / 365;
+
 			var runReport = new RunReport(
 				Name,
 				Description,
@@ -95,7 +97,7 @@
 				EndInvestment,
 				Cash / InitialInvestment,
 				TotalTradeCount,
-				TotalTradeCount / (decimal) (DataPoints.Last().Date - DataPoints[0].Date).TotalDays / 365,
+				TotalTradeCount / years,
 				MaxDrawdownPercent,
 				returnToDrawdownRatio,
 				profitFactor,
