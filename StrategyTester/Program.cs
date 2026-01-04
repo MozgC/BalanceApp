@@ -31,7 +31,7 @@
 			IEnumerable<Strategy> GenerateStrategies()
 			{
 				int minMA   = 20;
-				int maCount = 10;
+				int maCount = 180;
 
 				for (int maDays = minMA; maDays < minMA + maCount; maDays++)
 				{

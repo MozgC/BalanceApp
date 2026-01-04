@@ -61,7 +61,7 @@ namespace StrategyTester
 
 				var (bestStrategy, bestRunReport) = FindBestStrategyOnInSample(isData, iisFilter, heatMap);
 				
-				Console.WriteLine($"Optimization from {monthlyGroups[0][0].Date:yyyy-MM} till {monthlyGroups[inSampleEndMonth-1][0].Date:yyyy-MM} → best strategy: {bestStrategy.ParametersDescription}");
+				Console.WriteLine($"Optimization from {isData[0].Date:yyyy-MM} till {monthlyGroups[inSampleEndMonth-1][0].Date:yyyy-MM} → best strategy: {bestStrategy.ParametersDescription}");
 				
 				// OOS test
 				var oosData = monthlyGroups
