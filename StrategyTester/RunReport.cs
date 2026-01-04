@@ -5,22 +5,26 @@
 		public RunReport() { }
 
 		public RunReport(
-			string   strategyName,
-			string   strategyDescriptionAndParameters,
-			DateTime startDate,
-			DateTime endDate,
-			decimal  finalProfitRatio,
-			int      totalTradeCount,
-			decimal  avgTradeCountPerYear,
-			decimal  maxDrawdownPercent,
-			decimal  returnToDrawdownRatio,
-			decimal  profitFactor,
-			string   debug)
+			string                 strategyName,
+			string                 strategyDescriptionAndParameters,
+			DateTime               startDate,
+			DateTime               endDate,
+			decimal                initialInvestment,
+			decimal                finalInvestment,
+			decimal                finalProfitRatio,
+			int                    totalTradeCount,
+			decimal                avgTradeCountPerYear,
+			decimal                maxDrawdownPercent,
+			decimal                returnToDrawdownRatio,
+			decimal                profitFactor,
+			string                 debug)
 		{
 			StrategyName                     = strategyName;
 			StrategyDescriptionAndParameters = strategyDescriptionAndParameters;
 			StartDate                        = startDate;
 			EndDate                          = endDate;
+			InitialInvestment                = initialInvestment;
+			FinalInvestment                  = finalInvestment;
 			FinalProfitRatio                 = finalProfitRatio;
 			TotalTradeCount                  = totalTradeCount;
 			AvgTradeCountPerYear             = avgTradeCountPerYear;
@@ -38,6 +42,9 @@
 		// If the investment went from $1000 to $1100, it will be 1.1
 		public decimal  FinalProfitRatio;
 
+		public decimal  InitialInvestment;
+		public decimal  FinalInvestment;
+
 		public int      TotalTradeCount;
 		public decimal  AvgTradeCountPerYear;
 		public decimal  MaxDrawdownPercent;
@@ -53,5 +60,14 @@
 		// Gross profits divided by gross losses
 		public decimal  ProfitFactor;
 		public string   Debug;
+
+		public (decimal x, decimal y) HeatmapKey;
+		public decimal                HeatmapValue;
+
+		public void SetHeatmapKeyAndValue((decimal x, decimal y) heatmapKey, decimal heatmapValue)
+		{
+			HeatmapKey   = heatmapKey;
+			HeatmapValue = heatmapValue;
+		}
 	}
 }

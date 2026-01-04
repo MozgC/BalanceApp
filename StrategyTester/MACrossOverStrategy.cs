@@ -2,22 +2,32 @@
 {
 	public class MACrossOverStrategy : Strategy
 	{
-		private readonly int _emaDays;
-		private readonly int _maDays;
+		public readonly int EmaDays;
+		public readonly int MaDays;
 		private decimal? _currentMA;
 		private decimal? _maPrev;
 		private decimal? _currentEMA;
 		private decimal? _emaPrev;
 
-		public MACrossOverStrategy(string ticker, IList<StockPrice> dataPoints, int emaDays, int maDays) 
+		public MACrossOverStrategy(string ticker, int emaDays, int maDays) 
 			: base(
 				ticker, 
-				dataPoints, 
 				"Simple MA & EMA crossover strategy", 
-				$"If {emaDays} EMA crosses over below {maDays} MA - we sell. If {emaDays} EMA crosses over above {maDays} - we buy.")
+				$"If {emaDays} EMA crosses over below {maDays} MA - we sell. If {emaDays} EMA crosses over above {maDays} - we buy.",
+				$"EMA Days = {emaDays}, MA Days = {maDays}")
 		{
-			_emaDays = emaDays;
-			_maDays  = maDays;
+			EmaDays = emaDays;
+			MaDays  = maDays;
+		}
+		
+		public override (decimal x, decimal y) GetHeatmapKey()
+		{
+			return (MaDays, EmaDays);
+		}
+
+		public override Func<RunReport, decimal> GetHeatmapValue()
+		{
+			return r => r.FinalProfitRatio;
 		}
 
 		protected override bool CalcDailyParametersAndDecideIfCanBuyOrSell(int currentIndex)
@@ -30,10 +40,10 @@
 			if (Cash > 0 && !canSell)
 				return false;
 
-			_currentMA  = IndicatorFunctions.MovingAverage(Ticker, DataPoints, _maDays, currentIndex);
-			_maPrev     = IndicatorFunctions.MovingAverage(Ticker, DataPoints, _maDays, currentIndex - 1);
-			_currentEMA = IndicatorFunctions.ExponentialMovingAverage(Ticker, DataPoints, _emaDays, currentIndex);
-			_emaPrev    = IndicatorFunctions.ExponentialMovingAverage(Ticker, DataPoints, _emaDays, currentIndex - 1);
+			_currentMA  = IndicatorFunctions.MovingAverage(Ticker, DataPoints, MaDays, currentIndex);
+			_maPrev     = IndicatorFunctions.MovingAverage(Ticker, DataPoints, MaDays, currentIndex - 1);
+			_currentEMA = IndicatorFunctions.ExponentialMovingAverage(Ticker, DataPoints, EmaDays, currentIndex);
+			_emaPrev    = IndicatorFunctions.ExponentialMovingAverage(Ticker, DataPoints, EmaDays, currentIndex - 1);
 
 			if (_currentMA == null || _currentEMA == null)
 				return false;

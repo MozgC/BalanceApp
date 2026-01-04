@@ -5,7 +5,7 @@ namespace StrategyTester
 {
 	class ScottPlotHelper
 	{
-		public static void ShowHeatMap(Dictionary<(int x, int y), List<decimal>> heatMap, bool labelValues)
+		public static void ShowHeatMap(IDictionary<(decimal x, decimal y), List<decimal>> heatMap, bool labelValues)
 		{
 			/*
 			heatMap = new Dictionary<(int x, int y), List<decimal>>();
@@ -19,29 +19,29 @@ namespace StrategyTester
 			heatMap[(2, 5)] = new List<decimal>() { 8 };
 			heatMap[(2, 6)] = new List<decimal>() { 9 };
 			*/
-			
+
 			var maSet =  heatMap.Keys.Select(k => k.x).Distinct().OrderBy(x => x);
 			var emaSet = heatMap.Keys.Select(k => k.y).Distinct().OrderBy(x => x);
 
-			int[] xValues = maSet.ToArray();       // например: [30, 35, 40, ..., 150]
-			int[] yValues = emaSet.ToArray(); // например: [6, 7, 8, ..., 22]
+			decimal[] xValues = maSet.ToArray();       // например: [30, 35, 40, ..., 150]
+			decimal[] yValues = emaSet.ToArray(); // например: [6, 7, 8, ..., 22]
 
 			int cols = xValues.Length;       // высота = количество разных maDays
 			int rows = yValues.Length;  // ширина = количество разных процентов
 
 			double[,] data = new double[rows, cols];
-			
+
 			for (int row = 0; row < rows; row++)
 			{
-				int ema = yValues[row];
+				decimal ema = yValues[row];
 
 				for (int col = 0; col < cols; col++)
 				{
-					int ma = xValues[col];
+					decimal ma = xValues[col];
 
 					if (heatMap.TryGetValue((ma, ema), out var list) && list.Count > 0)
 					{
-						data[yValues.Length - 1 - row, col] = (double)list.Average();
+						data[yValues.Length - 1 - row, col] = (double) list.Average();
 					}
 					else
 					{
@@ -77,11 +77,11 @@ namespace StrategyTester
 
 			// map indices -> your X/Y values using manual ticks
 			double[] xPositions = Enumerable.Range(0, xValues.Length)
-				.Select(i => (double)i)
+				.Select(i => (double) i)
 				.ToArray();
 
 			double[] yPositions = Enumerable.Range(0, yValues.Length)
-				.Select(i => (double)i)
+				.Select(i => (double) i)
 				.ToArray();
 
 			plot.Axes.Bottom.SetTicks(
@@ -100,6 +100,38 @@ namespace StrategyTester
 			var cb = plot.Add.ColorBar(hm);
 			cb.Label = "Profit ratio";
 			///cb.LabelStyle.FontSize = 24;
+
+			FormsPlotViewer.Launch(plot);
+		}
+
+		public static void DrawEquityCurve(IList<(DateTime date, decimal equity)> equityCurve)
+		{
+			// Extract DateTime[] and double[] (ScottPlot works best with arrays for performance)
+			DateTime[] xs = equityCurve.Select(item => item.date).ToArray();
+			double[] ys   = equityCurve.Select(item => (double) item.equity).ToArray();  // decimal → double
+
+			var plot = new ScottPlot.Plot();
+			
+			// Add a scatter plot (points connected by lines - ideal for time series)
+			var scatter = plot.Add.Scatter(xs, ys);
+			scatter.MarkerSize = 6;          // Optional: make points visible
+			scatter.LineWidth = 2;           // Optional: thicker line
+
+			// If you want only points (no connecting line), use:
+			// var scatter = formsPlot1.Plot.Add.ScatterPoints(xs, ys);
+
+			// Enable DateTime formatting on the bottom X-axis
+			plot.Axes.DateTimeTicksBottom();
+
+			// Optional: style the default grid (it's already visible)
+			plot.Grid.MajorLineColor = ScottPlot.Colors.Gray.WithOpacity(0.4);
+			plot.Grid.MajorLineWidth = 1;
+
+			// Enable DateTime formatting on the bottom X-axis
+			plot.Axes.DateTimeTicksBottom();
+
+			plot.Title("My Time Series Data");
+			plot.Axes.AutoScale();
 
 			FormsPlotViewer.Launch(plot);
 		}

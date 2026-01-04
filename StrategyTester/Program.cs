@@ -59,7 +59,7 @@ namespace StrategyTester
 				Console.WriteLine($"Result: {result.result:C0}");
 				Console.WriteLine($"Log:{Environment.NewLine}{result.log}");
 			}
-					
+
 			CheckForSharpDrops(dataPoints);
 
 			var buyAndHoldResult = CalcBuyAndHold(initialInvestment, dataPoints);
@@ -69,13 +69,13 @@ namespace StrategyTester
 			Console.WriteLine($"Buy & Hold: {buyAndHoldResult:C}, Initial investment: {initialInvestment:C}, Avg year %: {avgPercent:N}");
 
 			var (dcaResult, totalInvested, dcaInfo) = TestDca(dataPoints, 1000, 1000);
-			Console.WriteLine($"DCA result: {dcaResult:C}. Total invested: {totalInvested:C}, Resulting % of original investment: %{dcaResult/totalInvested*100m:N2}");
+			Console.WriteLine($"DCA result: {dcaResult:C}. Total invested: {totalInvested:C}, Resulting % of original investment: %{dcaResult / totalInvested * 100m:N2}");
 
 			decimal record = 0;
-			
+
 			if (IsBelowMaAndEma(security, dataPoints, 27, 9, 5))
 				Console.WriteLine("Below MA & EMA!");
-	
+
 			Console.WriteLine("Done");
 			Console.ReadLine();
 		}
@@ -163,7 +163,7 @@ namespace StrategyTester
 			using (var db = new StrategyTesterDB("MakeMoneyDB"))
 			{
 				db.BulkCopy(dataPoints.Select(dp => new InstrumentPrice
-				{ Name = name, Date = dp.Date, AdjustedClosingPrice = dp.ClosingPrice }));
+					{ Name = name, Date = dp.Date, AdjustedClosingPrice = dp.ClosingPrice }));
 			}
 		}
 
@@ -302,7 +302,7 @@ namespace StrategyTester
 					shares = 0;
 
 					tradeCount++;
-					
+
 					decimal pnl = (price / entryPrice - 1m);
 					if (pnl > 0)
 					{
@@ -346,129 +346,32 @@ namespace StrategyTester
 			debug += $"Avg year %: {avgPercent:N}";
 
 			decimal profitFactor = grossLoss == 0 ? 999m : grossProfit / grossLoss;
-			
+
 			return (cash, debug, tradeCount, maxDrawdown, profitFactor);
 		}
-		
+
 		private static void TestMainStrategy2(string ticker, IList<StockPrice> dataPoints)
 		{
-			const int minMA = 25;
-			const int maCount = 75;
-		    // Сначала сортируем данные по дате (на всякий случай)
-		    dataPoints = dataPoints.OrderBy(dp => dp.Date).ToList();
+			IEnumerable<Strategy> GenerateStrategies()
+			{
+				int minMA   = 20;
+				int maCount = 180;
 
-		    // Группируем данные по месяцам для Walk-Forward
-		    var monthlyGroups = dataPoints.GroupBy(x => new { x.Date.Year, x.Date.Month })
-		                                  .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
-		                                  .Select(g => g.OrderBy(x => x.Date).ToList())
-		                                  .ToList();
+				for (int maDays = minMA; maDays < minMA + maCount; maDays++)
+				{
+					for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
+					{
+						yield return new MACrossOverStrategy("SOXL", emaDays, maDays);
+					}
+				}
+			}
 
-		    // Параметры для Walk-Forward
-		    const int minInSampleMonths = 48; // 4 года
-		    const int oosMonths = 12;         // 1 год OOS
-		    const int stepMonths = 12;        // Шаг переоптимизации 1 год
+			var walkForwardTester = new WalkForwardTester(GenerateStrategies, x => x.last.FinalProfitRatio > x.best.FinalProfitRatio);
 
-		    double capital = 1000.0;  // Начальный капитал
-		    var equityCurve = new List<double>();
-		    var allOosResults = new List<(int maDays, int emaDays, decimal oosProfitPercent, int trades)>(); // Для анализа
+			var result = walkForwardTester.Run(dataPoints, 1000, 48, 12, rr => rr.TotalTradeCount > 40, rr => rr.TotalTradeCount >= 6);
 
-		    // Heatmap данные: словарь для всех комбинаций (maDays, upPercent) -> средний result по emaDays
-		    var heatMap = new ConcurrentDictionary<(int ma, int ema), List<decimal>>();
-
-		    for (int oosStartMonth = minInSampleMonths; oosStartMonth < monthlyGroups.Count; oosStartMonth += stepMonths)
-		    {
-		        int isEndMonth = oosStartMonth;  // Конец In-Sample
-		        int oosEndMonth = Math.Min(oosStartMonth + oosMonths, monthlyGroups.Count);
-
-		        // Собираем In-Sample данные
-		        var isData = monthlyGroups.Take(isEndMonth).SelectMany(x => x).ToList();
-
-		        // Брутфорс на In-Sample с фильтрами против переобучения
-		        decimal record = decimal.MinValue;
-		        int bestMa = 0, bestEma = 0;
-		        string bestDebug = "";
-		        int bestTradesCount = 0;
-
-		        ParallelExtensions.RunInParallel(Enumerable.Range(minMA, maCount), Environment.ProcessorCount - 1, maDays =>
-		        {
-		            for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
-		            {
-			            var maCrossOverStrategy = new MACrossOverStrategy(ticker, isData, emaDays, maDays);
-			            var runReport = maCrossOverStrategy.Run();
-
-		                // Фильтры против переобучения
-		                if (runReport.TotalTradeCount >= 20 &&                
-		                    runReport.FinalProfitRatio > 1.5m &&        // Минимум 50% прибыли 
-		                    runReport.MaxDrawdownPercent < 60 && 
-		                    runReport.ProfitFactor > 1.6m)   
-		                {
-			                var key = (maDays, emaDays);
-			                if (!heatMap.ContainsKey(key))
-				                heatMap[key] = new List<decimal>();
-			                heatMap[key].Add(runReport.FinalProfitRatio);
-
-			                lock (_syncObj)
-		                    {
-		                        if (runReport.FinalProfitRatio > record)
-		                        {
-		                            record = runReport.FinalProfitRatio;
-		                            bestMa = maDays;
-		                            bestEma = emaDays;
-		                            bestDebug = runReport.Debug;
-		                            bestTradesCount = runReport.TotalTradeCount;
-		                        }
-		                    }
-		                }
-		            }
-		        });
-
-		        Console.WriteLine($"Оптимизация от {monthlyGroups[0][0].Date:yyyy-MM} до {monthlyGroups[isEndMonth-1][0].Date:yyyy-MM} → лучшие: MA={bestMa} EMA={bestEma} (сделок: {bestTradesCount})");
-
-				// OOS тест
-		        var oosData = monthlyGroups.Skip(isEndMonth).Take(oosEndMonth - isEndMonth).SelectMany(x => x).ToList();
-		        
-		        ParallelExtensions.RunInParallel(Enumerable.Range(minMA, maCount), Environment.ProcessorCount - 1, maDays =>
-		        {
-			        for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
-			        {
-				        var maCrossOverStrategy = new MACrossOverStrategy(ticker, isData, emaDays, maDays);
-				        var runReport = maCrossOverStrategy.Run();
-
-				        // Фильтры против переобучения
-				        if (runReport.TotalTradeCount >= 6 &&                
-				            runReport.FinalProfitRatio > 1.1m && 
-				            runReport.MaxDrawdownPercent < 60m && 
-				            runReport.ProfitFactor > 1.6m)   
-				        {
-					        var key = (maDays, emaDays);
-					        if (!heatMap.ContainsKey(key))
-						        heatMap[key] = new List<decimal>();
-					        heatMap[key].Add(runReport.FinalProfitRatio);
-
-					        lock (_syncObj)
-					        {
-						        if (runReport.FinalProfitRatio > record)
-						        {
-							        record = runReport.FinalProfitRatio;
-							        bestMa = maDays;
-							        bestEma = emaDays;
-							        bestDebug = runReport.Debug;
-							        bestTradesCount = runReport.TotalTradeCount;
-						        }
-					        }
-				        }
-			        }
-		        });
-
-		        equityCurve.Add(capital);
-		    }
-
-		    // В конце: вывод equity curve
-		    Console.WriteLine("\nEquity Curve:");
-		    foreach (var eq in equityCurve)
-		        Console.WriteLine(eq.ToString("F2"));
-
-		    ScottPlotHelper.ShowHeatMap(heatMap.ToDictionary(), false);
+			ScottPlotHelper.DrawEquityCurve(result.OOSEquityCurve);
+			ScottPlotHelper.ShowHeatMap(result.InSampleHeatMap, false);
 		}
 	}
 }
