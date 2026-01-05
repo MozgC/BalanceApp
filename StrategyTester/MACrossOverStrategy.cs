@@ -4,20 +4,23 @@
 	{
 		public readonly int EmaDays;
 		public readonly int MaDays;
+		private readonly bool _allowSellingAtLoss;
 		private decimal? _currentMA;
 		private decimal? _maPrev;
 		private decimal? _currentEMA;
 		private decimal? _emaPrev;
+		private decimal _price;
 
-		public MACrossOverStrategy(string ticker, int emaDays, int maDays) 
+		public MACrossOverStrategy(string ticker, int emaDays, int maDays, bool allowSellingAtLoss = true) 
 			: base(
 				ticker, 
 				"Simple MA & EMA crossover strategy", 
-				$"If {emaDays} EMA crosses over below {maDays} MA - we sell. If {emaDays} EMA crosses over above {maDays} - we buy.",
+				$"If {emaDays} days EMA crosses over below {maDays} days MA - we sell. If {emaDays} days EMA crosses over above {maDays} days MA- we buy.",
 				$"EMA Days = {emaDays}, MA Days = {maDays}")
 		{
 			EmaDays = emaDays;
 			MaDays  = maDays;
+			_allowSellingAtLoss = allowSellingAtLoss;
 		}
 		
 		public override (decimal x, decimal y) GetHeatmapKey()
@@ -33,12 +36,7 @@
 		protected override bool CalcDailyParametersAndDecideIfCanBuyOrSell(int currentIndex)
 		{
 			var dp = DataPoints[currentIndex];
-			decimal price = dp.ClosingPrice;
-
-			bool canSell = HoldingPeriodDays == 0 || dp.Date.Date - LastBuy.Date.Date > TimeSpan.FromDays(HoldingPeriodDays);
-
-			if (Cash > 0 && !canSell)
-				return false;
+			_price = dp.ClosingPrice;
 
 			_currentMA  = IndicatorFunctions.MovingAverage(Ticker, DataPoints, MaDays, currentIndex);
 			_maPrev     = IndicatorFunctions.MovingAverage(Ticker, DataPoints, MaDays, currentIndex - 1);
@@ -51,11 +49,6 @@
 			return true;
 		}
 
-		protected override void Initialize()
-		{
-			Initialize(true);
-		}
-
 		protected override bool ShouldEnter()
 		{
 			return _emaPrev < _maPrev && _currentEMA > _currentMA;
@@ -63,7 +56,24 @@
 		
 		protected override bool ShouldExit()
 		{
+			if (!_allowSellingAtLoss && LastBuy != null && _price < LastBuy.ClosingPrice)
+				return false;
+				
 			return _emaPrev > _maPrev && _currentEMA < _currentMA;
+		}
+
+		public override IEnumerable<Strategy> GenerateStrategies(string ticker)
+		{
+			int minMA   = 20;
+			int maCount = 35;
+
+			for (int maDays = minMA; maDays < minMA + maCount; maDays++)
+			{
+				for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
+				{
+					yield return new MACrossOverStrategy(ticker, emaDays, maDays);
+				}
+			}
 		}
 	}
 }

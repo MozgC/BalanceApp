@@ -104,7 +104,7 @@ namespace StrategyTester
 			FormsPlotViewer.Launch(plot);
 		}
 
-		public static void DrawEquityCurve(IList<(DateTime date, decimal equity)> equityCurve)
+		public static void DrawEquityCurve(string ticker, decimal percentOfPassedOosRuns, IList<(DateTime date, decimal equity)> equityCurve)
 		{
 			// Extract DateTime[] and double[] (ScottPlot works best with arrays for performance)
 			DateTime[] xs = equityCurve.Select(item => item.date).ToArray();
@@ -130,7 +130,7 @@ namespace StrategyTester
 			// Enable DateTime formatting on the bottom X-axis
 			plot.Axes.DateTimeTicksBottom();
 
-			plot.Title("My Time Series Data");
+			plot.Title(ticker + $", {percentOfPassedOosRuns:P} runs passed OOS filter");
 			plot.Axes.AutoScale();
 
 			FormsPlotViewer.Launch(plot);

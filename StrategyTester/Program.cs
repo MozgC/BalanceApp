@@ -23,30 +23,30 @@
 
 			dataPoints = dataPoints.SkipWhile(dp => dp.Date < fromDate).Where(dp => dp.Date < toDate).ToList();
 
-			TestMainStrategy(security, dataPoints);
+			WalkForwardTestOnMovingAveragesCrossoverStrategy(security, dataPoints);
 		}
 
-		private static void TestMainStrategy(string ticker, IList<StockPrice> dataPoints)
+		private static void WalkForwardTestOnMovingAveragesCrossoverStrategy(string ticker, IList<StockPrice> dataPoints)
 		{
 			IEnumerable<Strategy> GenerateStrategies()
 			{
 				int minMA   = 20;
-				int maCount = 180;
+				int maCount = 181;
 
 				for (int maDays = minMA; maDays < minMA + maCount; maDays++)
 				{
 					for (int emaDays = 7; emaDays <= (maDays + 1) / 2; emaDays += 1)
 					{
-						yield return new MACrossOverStrategy("SOXL", emaDays, maDays);
+						yield return new MACrossOverStrategy(ticker, emaDays, maDays, true) { HoldingPeriodDays = 30 };
 					}
 				}
 			}
 
 			var walkForwardTester = new WalkForwardTester(GenerateStrategies, x => x.last.FinalProfitRatio > x.best.FinalProfitRatio);
 
-			var result = walkForwardTester.Run(dataPoints, 1000, 48, 12, rr => rr.TotalTradeCount > 40, rr => rr.TotalTradeCount >= 6);
+			var result = walkForwardTester.Run(dataPoints, 1000, 48, 12, rr => rr.TotalTradeCount >= 30, rr => rr.TotalTradeCount >= 6);
 
-			ScottPlotHelper.DrawEquityCurve(result.OOSEquityCurve);
+			ScottPlotHelper.DrawEquityCurve(ticker, result.OOSRunsPassedOOSFilterCount / (decimal)result.OOSRunReports.Count, result.OOSEquityCurve);
 			ScottPlotHelper.ShowHeatMap(result.InSampleHeatMap, false);
 		}
 	}

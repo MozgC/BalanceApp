@@ -9,6 +9,8 @@ public class WalkForwardResult
 	public ConcurrentDictionary<(decimal x, decimal y), List<decimal>> InSampleHeatMap;
 	public int                                                         OOSRunsPassedOOSFilterCount;
 
+	public decimal PercentOfOOSRunsPassedFilter => OOSRunsPassedOOSFilterCount / OOSRunReports.Count;
+
 	public WalkForwardResult(
 		IList<RunReport>                                            ooSRunReports, 
 		List<(DateTime, decimal)>                                   ooSEquityCurve, 

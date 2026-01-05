@@ -11,7 +11,10 @@
 			DateTime               endDate,
 			decimal                initialInvestment,
 			decimal                finalInvestment,
+			decimal                finalCash,
+			decimal                finalShares,
 			decimal                finalProfitRatio,
+			StockPrice             lastBuy,
 			int                    totalTradeCount,
 			decimal                avgTradeCountPerYear,
 			decimal                maxDrawdownPercent,
@@ -25,7 +28,10 @@
 			EndDate                          = endDate;
 			InitialInvestment                = initialInvestment;
 			FinalInvestment                  = finalInvestment;
+			FinalCash                        = finalCash;
+			FinalShares                      = finalShares;
 			FinalProfitRatio                 = finalProfitRatio;
+			LastBuy                          = lastBuy;
 			TotalTradeCount                  = totalTradeCount;
 			AvgTradeCountPerYear             = avgTradeCountPerYear;
 			MaxDrawdownPercent               = maxDrawdownPercent;
@@ -34,20 +40,23 @@
 			Debug                            = debug;
 		}
 		
-		public string   StrategyName;
-		public string   StrategyDescriptionAndParameters;
-		public DateTime StartDate;
-		public DateTime EndDate;
+		public string     StrategyName;
+		public string     StrategyDescriptionAndParameters;
+		public DateTime   StartDate;
+		public DateTime   EndDate;
 
 		// If the investment went from $1000 to $1100, it will be 1.1
-		public decimal  FinalProfitRatio;
+		public decimal    FinalProfitRatio;
+						  
+		public decimal    InitialInvestment;
+		public decimal    FinalInvestment; // Either cash or shares value at end
+		public decimal    FinalCash;
+		public decimal    FinalShares;
+		public StockPrice LastBuy;
 
-		public decimal  InitialInvestment;
-		public decimal  FinalInvestment;
-
-		public int      TotalTradeCount;
-		public decimal  AvgTradeCountPerYear;
-		public decimal  MaxDrawdownPercent;
+		public int        TotalTradeCount;
+		public decimal    AvgTradeCountPerYear;
+		public decimal    MaxDrawdownPercent;
 
 		/*
 		One of the most important indicators. Calculated as average annualized return divided by max drawdown.
@@ -55,11 +64,11 @@
 		Obviously, high values of this ratio are better. I generally look for return/drawdown ratios above 2.0, although I will	accept lower values in special circumstances.
 		In my experience, I find that ratios above 2.0 will usually produce acceptable results in the real world of trading live.
 		*/
-		public decimal  ReturnToDrawdownRatio;
+		public decimal    ReturnToDrawdownRatio;
 
 		// Gross profits divided by gross losses
-		public decimal  ProfitFactor;
-		public string   Debug;
+		public decimal    ProfitFactor;
+		public string     Debug;
 
 		public (decimal x, decimal y) HeatmapKey;
 		public decimal                HeatmapValue;
