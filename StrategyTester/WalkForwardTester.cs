@@ -30,7 +30,7 @@ namespace StrategyTester
 			int ooSRunsPassedOOSFilterCount = 0;
 			decimal initialShares           = 0;
 			decimal initialCash             = initialInvestment;
-			StockPrice lastBuy              = null;
+			StockPrice? lastBuy             = null;
 			bool firstOosRun                = true;
 			
 			Console.Write(Environment.NewLine + "Beginning Walk-Forward..." + Environment.NewLine);

@@ -36,10 +36,10 @@
 
 		public virtual Func<RunReport, decimal> GetHeatmapValue()
 		{
-			return r => 0;
+			return _ => 0;
 		}
 
-		public Strategy(string ticker, string name, string description, string parametersDescription)
+		protected Strategy(string ticker, string name, string description, string parametersDescription)
 		{
 			Ticker                   = ticker;
 			Name                     = name;
@@ -163,7 +163,6 @@
 
 		protected void Buy(StockPrice dp)
 		{
-			decimal price;
 			string str = $"{dp.Date:d} Buying {Cash / dp.ClosingPrice:N} shares at {dp.ClosingPrice:C} for  {Cash:C}\n";
 			Debug += str;
 
@@ -181,7 +180,7 @@
 
 			Cash = Shares * dp.ClosingPrice;
 
-			decimal tradeProfitAndLoss = Cash - (Shares * LastBuy.ClosingPrice);
+			decimal tradeProfitAndLoss = Cash - Shares * LastBuy.ClosingPrice;
 
 			if (tradeProfitAndLoss > 0)
 				GrossProfit += tradeProfitAndLoss;

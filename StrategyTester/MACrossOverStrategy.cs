@@ -2,14 +2,15 @@
 {
 	public class MACrossOverStrategy : Strategy
 	{
-		public readonly int EmaDays;
-		public readonly int MaDays;
-		private readonly bool _allowSellingAtLoss;
-		private decimal? _currentMA;
-		private decimal? _maPrev;
-		private decimal? _currentEMA;
-		private decimal? _emaPrev;
-		private decimal _price;
+		public  readonly int EmaDays;
+		public  readonly int MaDays;
+		
+		private readonly bool     _allowSellingAtLoss;
+		private          decimal? _currentMA;
+		private          decimal? _maPrev;
+		private          decimal? _currentEMA;
+		private          decimal? _emaPrev;
+		private          decimal  _price;
 
 		public MACrossOverStrategy(string ticker, int emaDays, int maDays, bool allowSellingAtLoss = true) 
 			: base(
