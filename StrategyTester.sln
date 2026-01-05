@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{36258BEE-6642-462F-9178-5911794D2428}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StrategyTester.Tests", "StrategyTester.Tests\StrategyTester.Tests.csproj", "{25724576-ACE6-4FB0-9BF0-74A12B3ADCE1}"

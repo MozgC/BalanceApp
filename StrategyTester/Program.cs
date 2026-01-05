@@ -11,7 +11,7 @@
 			Console.OutputEncoding = System.Text.Encoding.UTF8;
 			Console.InputEncoding = System.Text.Encoding.UTF8;
 
-			string security = "SOXL";
+			string security = "VOO";
 			Console.WriteLine("Security: " + security);
 
 			_client = new YahooFinanceProvider();
@@ -23,10 +23,16 @@
 
 			dataPoints = dataPoints.SkipWhile(dp => dp.Date < fromDate).Where(dp => dp.Date < toDate).ToList();
 
-			WalkForwardTestOnMovingAveragesCrossoverStrategy(security, dataPoints);
+			var result = WalkForwardTestOnMovingAveragesCrossoverStrategy(security, dataPoints);
+			
+			Console.WriteLine(Environment.NewLine + "Buy & Hold:");
+			decimal buyAndHold = CalcBuyAndHold(1000, dataPoints.SkipWhile(x => x.Date <= result.OOSRunReports[0].StartDate).ToList());
+			Console.WriteLine($"{buyAndHold:C}");
+
+			Console.Read();
 		}
 
-		private static void WalkForwardTestOnMovingAveragesCrossoverStrategy(string ticker, IList<StockPrice> dataPoints)
+		private static WalkForwardResult WalkForwardTestOnMovingAveragesCrossoverStrategy(string ticker, IList<StockPrice> dataPoints)
 		{
 			IEnumerable<Strategy> GenerateStrategies()
 			{
@@ -44,10 +50,12 @@
 
 			var walkForwardTester = new WalkForwardTester(GenerateStrategies, x => x.last.FinalProfitRatio > x.best.FinalProfitRatio);
 
-			var result = walkForwardTester.Run(dataPoints, 1000, 48, 12, rr => rr.TotalTradeCount >= 30, rr => rr.TotalTradeCount >= 6);
+			var result = walkForwardTester.Run(dataPoints, 1000, 48, 12, rr => rr.TotalTradeCount >= 20, rr => rr.TotalTradeCount >= 6);
 
 			ScottPlotHelper.DrawEquityCurve(ticker, result.OOSRunsPassedOOSFilterCount / (decimal)result.OOSRunReports.Count, result.OOSEquityCurve);
 			ScottPlotHelper.ShowHeatMap(result.InSampleHeatMap, false);
+
+			return result;
 		}
 	}
 }
