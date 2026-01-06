@@ -28,6 +28,19 @@
 		public    decimal     GrossLoss;
 
 		public IList<StockPrice> DataPoints;
+		
+		private Func<bool> _overrideEntryLogic;
+		private Func<bool>  _overrideExitLogic;
+
+		public void OverrideEntryLogic(Func<bool> logic)
+		{
+			_overrideEntryLogic = logic;
+		}
+
+		public void OverrideExitLogic(Func<bool> logic)
+		{
+			_overrideExitLogic = logic;
+		}
 
 		public virtual (decimal x, decimal y) GetHeatmapKey()
 		{
@@ -110,14 +123,13 @@
 				if (!CalcDailyParametersAndDecideIfCanBuyOrSell(i))
 					continue;
 
-				if (Shares > 0 && ShouldExit())
-				{
-					Sell(dp);
-				}
-				// if price is below  MA and above EMA - buy
-				else if (Cash > 0 && ShouldEnter())
+				if (Cash > 0 && EffectiveShouldEnter())
 				{
 					Buy(dp);
+				}
+				else if (Shares > 0 && EffectiveShouldExit())
+				{
+					Sell(dp);
 				}
 			}
 
@@ -139,6 +151,7 @@
 			decimal years = (decimal) (DataPoints.Last().Date - DataPoints[0].Date).TotalDays / 365;
 
 			var runReport = new RunReport(
+				this,
 				Name,
 				Description,
 				DataPoints[0].Date,
@@ -191,6 +204,11 @@
 
 			TotalTradeCount++;
 		}
+		
+		// Small helper to centralize “effective” logic
+		private bool EffectiveShouldEnter() => _overrideEntryLogic?.Invoke() ?? ShouldEnter();
+
+		private bool EffectiveShouldExit() => _overrideExitLogic?.Invoke() ?? ShouldExit();
 
 		protected abstract bool ShouldEnter();
 		protected abstract bool ShouldExit();

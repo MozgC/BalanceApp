@@ -5,6 +5,7 @@
 		public RunReport() { }
 
 		public RunReport(
+			Strategy               strategy,
 			string                 strategyName,
 			string                 strategyDescriptionAndParameters,
 			DateTime               startDate,
@@ -22,6 +23,7 @@
 			decimal                profitFactor,
 			string                 debug)
 		{
+			Strategy                         = strategy;
 			StrategyName                     = strategyName;
 			StrategyDescriptionAndParameters = strategyDescriptionAndParameters;
 			StartDate                        = startDate;
@@ -39,7 +41,8 @@
 			ProfitFactor                     = profitFactor;
 			Debug                            = debug;
 		}
-		
+
+		public Strategy   Strategy;
 		public string     StrategyName;
 		public string     StrategyDescriptionAndParameters;
 		public DateTime   StartDate;

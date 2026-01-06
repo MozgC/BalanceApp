@@ -8,6 +8,8 @@ public class WalkForwardResult
 	public List<(DateTime, decimal)>                                   OOSEquityCurve;
 	public ConcurrentDictionary<(decimal x, decimal y), List<decimal>> InSampleHeatMap;
 	public int                                                         OOSRunsPassedOOSFilterCount;
+	
+	public decimal FinalInvestment => OOSRunReports.Last().FinalInvestment;
 
 	public decimal PercentOfOOSRunsPassedFilter => OOSRunsPassedOOSFilterCount / OOSRunReports.Count;
 

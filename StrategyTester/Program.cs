@@ -11,8 +11,10 @@
 			Console.OutputEncoding = System.Text.Encoding.UTF8;
 			Console.InputEncoding = System.Text.Encoding.UTF8;
 
-			string security = "VOO";
+			string security = "SOXL";
 			Console.WriteLine("Security: " + security);
+			decimal initialInvestment = 1000;
+			Console.WriteLine($"Initial investment: {initialInvestment:C}");
 
 			_client = new YahooFinanceProvider();
 			var dataPoints = _client.GetLast10YearsOfPrices(security);
@@ -23,16 +25,32 @@
 
 			dataPoints = dataPoints.SkipWhile(dp => dp.Date < fromDate).Where(dp => dp.Date < toDate).ToList();
 
-			var result = WalkForwardTestOnMovingAveragesCrossoverStrategy(security, dataPoints);
+			var result = WalkForwardTestOnMovingAveragesCrossoverStrategy(security, initialInvestment, dataPoints);
 			
 			Console.WriteLine(Environment.NewLine + "Buy & Hold:");
-			decimal buyAndHold = CalcBuyAndHold(1000, dataPoints.SkipWhile(x => x.Date <= result.OOSRunReports[0].StartDate).ToList());
+			decimal buyAndHold = CalcBuyAndHold(initialInvestment, dataPoints.SkipWhile(x => x.Date <= result.OOSRunReports[0].StartDate).ToList());
 			Console.WriteLine($"{buyAndHold:C}");
+
+			Console.WriteLine(Environment.NewLine + "Starting monkey tests..." + Environment.NewLine);
+			
+			var monkeyTester = new MonkeyTester();
+			var monkeyTestResults = monkeyTester.Run(dataPoints.SkipWhile(x => x.Date < result.OOSRunReports[0].StartDate).ToList(), result.OOSRunReports.Last().Strategy);
+			
+			Console.WriteLine("Monkey test results:" + Environment.NewLine);
+			Console.WriteLine($"90% of monkey tests with random entry returned below {monkeyTestResults.RandomEnter90PercentFinalInvestment:C}");
+			Console.WriteLine($"90% of monkey tests with random exit returned below {monkeyTestResults.RandomExit90PercentFinalInvestment:C}");
+			Console.WriteLine($"90% of monkey tests with random entry and exit returned below {monkeyTestResults.RandomEnterAndExit90PercentFinalInvestment:C}");
+			
+			Console.WriteLine();
+			
+			Console.WriteLine($"Is our strategy better than 90% of monkey test runs with random entry? - {result.FinalInvestment > monkeyTestResults.RandomEnter90PercentFinalInvestment}");
+			Console.WriteLine($"Is our strategy better than 90% of monkey test runs with random exit? - {result.FinalInvestment > monkeyTestResults.RandomExit90PercentFinalInvestment}");
+			Console.WriteLine($"Is our strategy better than 90% of monkey test runs with random entry and exit? - {result.FinalInvestment > monkeyTestResults.RandomEnterAndExit90PercentFinalInvestment}");
 
 			Console.Read();
 		}
 
-		private static WalkForwardResult WalkForwardTestOnMovingAveragesCrossoverStrategy(string ticker, IList<StockPrice> dataPoints)
+		private static WalkForwardResult WalkForwardTestOnMovingAveragesCrossoverStrategy(string ticker, decimal initialInvestment, IList<StockPrice> dataPoints)
 		{
 			IEnumerable<Strategy> GenerateStrategies()
 			{
@@ -50,7 +68,7 @@
 
 			var walkForwardTester = new WalkForwardTester(GenerateStrategies, x => x.last.FinalProfitRatio > x.best.FinalProfitRatio);
 
-			var result = walkForwardTester.Run(dataPoints, 1000, 48, 12, rr => rr.TotalTradeCount >= 20, rr => rr.TotalTradeCount >= 6);
+			var result = walkForwardTester.Run(dataPoints, initialInvestment, 48, 12, rr => rr.TotalTradeCount >= 30, rr => rr.TotalTradeCount >= 6);
 
 			ScottPlotHelper.DrawEquityCurve(ticker, result.OOSRunsPassedOOSFilterCount / (decimal)result.OOSRunReports.Count, result.OOSEquityCurve);
 			ScottPlotHelper.ShowHeatMap(result.InSampleHeatMap, false);
