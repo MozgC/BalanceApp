@@ -12,14 +12,13 @@ public class MonkeyTester
 		ConcurrentBag<RunReport> randomEntryAndExitReports = new();
 
 		const int numberOfRuns = 8000;
-		var rnd = new Random();
 				
 		ParallelExtensions.RunInParallel(Enumerable.Range(0, numberOfRuns), i =>
 		{
 			var strat = FastCloner.FastCloner.ShallowClone(strategy);
 				
-			int x = rnd.Next();
-			strat.OverrideEntryLogic(() => x % 30 == 0);
+			int x = Random.Shared.Next();
+			strat.OverrideEntryLogic(() => x % 5 == 0);
 
 			randomEntryReports.Add(strat.Run(dataPoints, true));
 		});
@@ -30,8 +29,8 @@ public class MonkeyTester
 		{
 			var strat = FastCloner.FastCloner.ShallowClone(strategy);
 			
-			int x = rnd.Next();
-			strat.OverrideExitLogic(() => x % 30 == 0);
+			int x = Random.Shared.Next();
+			strat.OverrideExitLogic(() => x % 5 == 0);
 
 			randomExitReports.Add(strat.Run(dataPoints, true));
 		});
@@ -40,10 +39,10 @@ public class MonkeyTester
 		{
 			var strat = FastCloner.FastCloner.ShallowClone(strategy);
 			
-			int x = rnd.Next();
-			strat.OverrideEntryLogic(() => x % 30 == 0);
-			int y = rnd.Next();
-			strat.OverrideExitLogic(() => y % 30 == 0);
+			int x = Random.Shared.Next();
+			strat.OverrideEntryLogic(() => x % 5 == 0);
+			int y = Random.Shared.Next();
+			strat.OverrideExitLogic(() => y % 5 == 0);
 
 			randomEntryAndExitReports.Add(strat.Run(dataPoints, true));
 		});
