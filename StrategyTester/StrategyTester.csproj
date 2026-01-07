@@ -19,6 +19,7 @@
     <PackageReference Include="AlphaVantage.Net.Core" Version="2.0.2" />
     <PackageReference Include="AlphaVantage.Net.Stocks" Version="2.0.2" />
     <PackageReference Include="CodeJam" Version="4.1.0" />
+    <PackageReference Include="FastCloner" Version="3.3.23" />
     <PackageReference Include="linq2db" Version="6.1.0" />
     <PackageReference Include="linq2db.SQLite" Version="6.1.0" />
     <PackageReference Include="OoplesFinance.YahooFinanceAPI" Version="1.7.1" />

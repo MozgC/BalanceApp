@@ -1,43 +1,58 @@
-﻿namespace StrategyTester;
+﻿using System.Collections.Concurrent;
+using CodeJam.Threading;
+
+namespace StrategyTester;
 
 public class MonkeyTester
 {
 	public MonkeyTestResult Run(IList<StockPrice> dataPoints, Strategy strategy)
 	{
-		List<RunReport> randomEntryReports        = new();
-		List<RunReport> randomExitReports         = new();
-		List<RunReport> randomEntryAndExitReports = new();
+		ConcurrentBag<RunReport> randomEntryReports        = new();
+		ConcurrentBag<RunReport> randomExitReports         = new();
+		ConcurrentBag<RunReport> randomEntryAndExitReports = new();
+
+		const int numberOfRuns = 8000;
+		var rnd = new Random();
 				
-		for (int i = 0; i < 8000; i++)
+		ParallelExtensions.RunInParallel(Enumerable.Range(0, numberOfRuns), i =>
 		{
-			int x = i;
-			strategy.OverrideEntryLogic(() => x % 30 == 0);
+			var strat = FastCloner.FastCloner.ShallowClone(strategy);
+				
+			int x = rnd.Next();
+			strat.OverrideEntryLogic(() => x % 30 == 0);
 
-			randomEntryReports.Add(strategy.Run(dataPoints, true));
-		}
-			
+			randomEntryReports.Add(strat.Run(dataPoints, true));
+		});
+		
 		strategy.OverrideEntryLogic(null);
+
+		ParallelExtensions.RunInParallel(Enumerable.Range(0, numberOfRuns), i =>
+		{
+			var strat = FastCloner.FastCloner.ShallowClone(strategy);
 			
-		for (int i = 0; i < 8000; i++)
+			int x = rnd.Next();
+			strat.OverrideExitLogic(() => x % 30 == 0);
+
+			randomExitReports.Add(strat.Run(dataPoints, true));
+		});
+		
+		ParallelExtensions.RunInParallel(Enumerable.Range(0, numberOfRuns), i =>
 		{
-			int x = i;
-			strategy.OverrideExitLogic(() => x % 30 == 0);
+			var strat = FastCloner.FastCloner.ShallowClone(strategy);
+			
+			int x = rnd.Next();
+			strat.OverrideEntryLogic(() => x % 30 == 0);
+			int y = rnd.Next();
+			strat.OverrideExitLogic(() => y % 30 == 0);
 
-			randomExitReports.Add(strategy.Run(dataPoints, true));
-		}
-
-		for (int i = 0; i < 8000; i++)
-		{
-			int x = i;
-			strategy.OverrideEntryLogic(() => x % 30 == 0);
-			strategy.OverrideExitLogic(() => x % 30 == 0);
-
-			randomEntryAndExitReports.Add(strategy.Run(dataPoints, true));
-		}
+			randomEntryAndExitReports.Add(strat.Run(dataPoints, true));
+		});
+		
+		const int ninetyPercentRuns = (int)(numberOfRuns * 0.9m);
 
 		return new MonkeyTestResult(
-			randomEntryReports       .OrderBy(x => x.FinalInvestment).Skip(7200).First().FinalInvestment,
-			randomExitReports        .OrderBy(x => x.FinalInvestment).Skip(7200).First().FinalInvestment,
-			randomEntryAndExitReports.OrderBy(x => x.FinalInvestment).Skip(7200).First().FinalInvestment);
+			randomEntryReports       .OrderBy(x => x.FinalInvestment).Skip(ninetyPercentRuns).First().FinalInvestment,
+			randomExitReports        .OrderBy(x => x.FinalInvestment).Skip(ninetyPercentRuns).First().FinalInvestment,
+			randomEntryAndExitReports.OrderBy(x => x.FinalInvestment).Skip(ninetyPercentRuns).First().FinalInvestment);
 	}
 }

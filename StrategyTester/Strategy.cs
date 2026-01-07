@@ -30,7 +30,7 @@
 		public IList<StockPrice> DataPoints;
 		
 		private Func<bool> _overrideEntryLogic;
-		private Func<bool>  _overrideExitLogic;
+		private Func<bool> _overrideExitLogic;
 
 		public void OverrideEntryLogic(Func<bool> logic)
 		{
