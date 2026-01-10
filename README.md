@@ -16,7 +16,9 @@ You can run the application right away and see the testing results.
 
 You can change the security in Program.cs:
 
-```csharp string security = "SOXL";```
+```csharp
+string security = "SOXL";
+```
 
 To add your own strategy:
 1. Create a new class derived from Strategy and implement the required methods.
