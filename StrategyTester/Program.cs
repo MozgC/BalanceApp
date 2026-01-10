@@ -11,9 +11,10 @@ namespace StrategyTester
 		static void Main(string[] args)
 		{
 			Console.OutputEncoding = System.Text.Encoding.UTF8;
-			Console.InputEncoding = System.Text.Encoding.UTF8;
+			Console.InputEncoding  = System.Text.Encoding.UTF8;
 
 			string security = "SOXL";
+
 			Console.WriteLine("Security: " + security);
 			decimal initialInvestment = 1000;
 			Console.WriteLine($"Initial investment: {initialInvestment:C}");
