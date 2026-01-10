@@ -157,6 +157,8 @@
 				DataPoints[0].Date,
 				DataPoints.Last().Date,
 				initialInvestment,
+				initialCash,
+				initialShares,
 				FinalInvestment,
 				Cash,
 				Shares,
@@ -212,5 +214,10 @@
 
 		protected abstract bool ShouldEnter();
 		protected abstract bool ShouldExit();
+		
+		public Strategy ShallowClone()
+		{
+			return FastCloner.FastCloner.ShallowClone(this);
+		}
 	}
 }

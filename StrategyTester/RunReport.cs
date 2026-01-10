@@ -11,6 +11,8 @@
 			DateTime               startDate,
 			DateTime               endDate,
 			decimal                initialInvestment,
+			decimal                initialCash,
+			decimal                initialShares,
 			decimal                finalInvestment,
 			decimal                finalCash,
 			decimal                finalShares,
@@ -29,6 +31,8 @@
 			StartDate                        = startDate;
 			EndDate                          = endDate;
 			InitialInvestment                = initialInvestment;
+			InitialCash                      = initialCash;
+			InitialShares                    = initialShares;
 			FinalInvestment                  = finalInvestment;
 			FinalCash                        = finalCash;
 			FinalShares                      = finalShares;
@@ -52,6 +56,9 @@
 		public decimal    FinalProfitRatio;
 						  
 		public decimal    InitialInvestment;
+		public decimal    InitialCash;
+		public decimal    InitialShares;
+		
 		public decimal    FinalInvestment; // Either cash or shares value at end
 		public decimal    FinalCash;
 		public decimal    FinalShares;
